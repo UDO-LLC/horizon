@@ -1,0 +1,181 @@
+# Shopify Theme Development .gitignore
+
+# ===========================================
+# Shopify Specific
+# ===========================================
+
+# Shopify CLI files
+.shopify/
+shopify.theme.toml
+.shopifyignore
+
+# Theme configuration backup files
+config/settings_data.json.bak
+config/settings_schema.json.bak
+
+# Shopify development files
+*.theme
+.theme-check.yml
+
+# ===========================================
+# Development Tools & Dependencies
+# ===========================================
+
+# Node.js dependencies (if using build tools)
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+package-lock.json
+yarn.lock
+.pnpm-debug.log*
+
+# Build outputs
+dist/
+build/
+.cache/
+.parcel-cache/
+
+# Environment variables
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# ===========================================
+# IDE Specific Files
+# ===========================================
+
+# Visual Studio Code
+.vscode/
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+*.code-workspace
+
+# Cursor IDE
+.cursor/
+*.cursor-workspace
+
+# JetBrains WebStorm
+.idea/
+*.iws
+*.iml
+*.ipr
+out/
+.idea_modules/
+
+# ===========================================
+# Operating System Files
+# ===========================================
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon?
+._*
+.DocumentRevisions-V100
+.fseventsd
+.Spotlight-V100
+.TemporaryItems
+.Trashes
+.VolumeIcon.icns
+.com.apple.timemachine.donotpresent
+
+# Windows
+Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+ehthumbs_vista.db
+*.stackdump
+[Dd]esktop.ini
+$RECYCLE.BIN/
+*.cab
+*.msi
+*.msix
+*.msm
+*.msp
+*.lnk
+
+# Linux
+*~
+.fuse_hidden*
+.directory
+.Trash-*
+.nfs*
+
+# ===========================================
+# Temporary & Log Files
+# ===========================================
+
+# Logs
+logs/
+*.log
+
+# Runtime data
+pids/
+*.pid
+*.seed
+*.pid.lock
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+*.temp
+
+# Backup files
+*.bak
+*.backup
+*.old
+*.orig
+
+# ===========================================
+# Version Control
+# ===========================================
+
+# Git
+*.patch
+*.diff
+
+# ===========================================
+# Compression & Archives
+# ===========================================
+
+*.zip
+*.tar.gz
+*.rar
+*.7z
+
+# ===========================================
+# Shopify Theme Specific Patterns
+# ===========================================
+
+# Ignore compiled CSS if using preprocessors (uncomment if needed)
+# assets/style.css
+# assets/style.min.css
+
+# Ignore compiled JS if using bundlers (uncomment if needed)
+# assets/bundle.js
+# assets/bundle.min.js
+
+# Theme development tools cache
+.liquid-cache/
+.theme-lint-cache/
+
+# ===========================================
+# Custom Development Files
+# ===========================================
+
+# Documentation drafts
+NOTES.md
+TODO.md
+CHANGELOG.draft.md
+
+# Development screenshots
+screenshots/
+mockups/
+design-assets/
