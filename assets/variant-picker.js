@@ -1,5 +1,5 @@
 import { Component } from '@theme/component';
-import { VariantSelectedEvent, VariantUpdateEvent } from '@theme/events';
+import { MainMorphedEvent, VariantPickerMorphedEvent, VariantSelectedEvent, VariantUpdateEvent } from '@theme/events';
 import { morph } from '@theme/morph';
 import { requestYieldCallback } from '@theme/utilities';
 
@@ -223,6 +223,13 @@ export default class VariantPicker extends Component {
 
     morph(this, newVariantPickerSource);
 
+    this.dispatchEvent(new VariantPickerMorphedEvent({
+      productId: this.dataset.productId,
+      productUrl: this.dataset.productUrl,
+      newProduct,
+      timestamp: Date.now()
+    }));
+
     return newProduct;
   }
 
@@ -239,6 +246,12 @@ export default class VariantPicker extends Component {
     }
 
     morph(main, newMain);
+
+    this.dispatchEvent(new MainMorphedEvent({
+      productId: this.dataset.productId,
+      productUrl: this.dataset.productUrl,
+      timestamp: Date.now()
+    }));
   }
 
   /**

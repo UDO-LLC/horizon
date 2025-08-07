@@ -26,6 +26,10 @@ export class ThemeEvents {
   static discountUpdate = 'discount:update';
   /** @static @constant {string} Event triggered when changing collection filters */
   static FilterUpdate = 'filter:update';
+  /** @static @constant {string} Event triggered when a variant picker is morphed */
+  static variantPickerMorphed = 'variant-picker:morphed';
+  /** @static @constant {string} Event triggered when the main content is morphed */
+  static mainMorphed = 'main:morphed';
 }
 
 /**
@@ -281,5 +285,21 @@ export class FilterUpdateEvent extends Event {
 
   shouldShowClearAll() {
     return [...this.detail.queryParams.entries()].filter(([key]) => key.startsWith('filter.')).length > 0;
+  }
+}
+
+export class VariantPickerMorphedEvent extends Event {
+  /** @param {Object} data */
+  constructor(data) {
+    super(ThemeEvents.variantPickerMorphed, { bubbles: true });
+    this.detail = data;
+  }
+}
+
+export class MainMorphedEvent extends Event {
+  /** @param {Object} data */
+  constructor(data) {
+    super(ThemeEvents.mainMorphed, { bubbles: true });
+    this.detail = data;
   }
 }
