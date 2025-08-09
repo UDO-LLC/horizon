@@ -24,13 +24,11 @@ export class AddToCartComponent extends Component {
 
   connectedCallback() {
     super.connectedCallback();
-
     this.addEventListener('pointerenter', this.#preloadImage);
   }
-
+  
   disconnectedCallback() {
     super.disconnectedCallback();
-
     if (this.#animationTimeout) clearTimeout(this.#animationTimeout);
     if (this.#cleanupTimeout) clearTimeout(this.#cleanupTimeout);
     this.removeEventListener('pointerenter', this.#preloadImage);
@@ -51,13 +49,53 @@ export class AddToCartComponent extends Component {
   }
 
   /**
+   * Shows the loading spinner on the add to cart button.
+   */
+  showSpinner() {
+    this.refs.addToCartButton.classList.add('is-loading');
+  }
+
+  /**
+   * Hides the loading spinner on the add to cart button.
+   */
+  hideSpinner() {
+    this.refs.addToCartButton.classList.remove('is-loading');
+  }
+
+  /**
    * Handles the click event for the add to cart button.
    * @param {MouseEvent & {target: HTMLElement}} event - The click event.
    */
   handleClick(event) {
-    this.animateAddToCart();
+    this.listenToAppBlockState();
+  }
+  
+  listenToAppBlockState() {
+    window.UdoPaintsEditorManager.onStateChange((params) => {
+      if (params.state === 'upload-state:loading') {
+        this.disable();
+      } else if (params.state === 'upload-state:success') {
+        this.enable();
+      }
+    });
+  }
 
-    if (!event.target.closest('.quick-add-modal')) this.#animateFlyToCart();
+  /**
+   * Handles the started adding to cart event.
+   */
+  handleStartedAddingToCart() {
+    this.disable();
+    this.showSpinner();
+  }
+
+  /**
+   * Handles the successful add to cart event.
+   */
+  handleSuccessfulAddToCart() {
+    this.animateAddToCart();
+    if (!this.closest('.quick-add-modal')) this.#animateFlyToCart();
+    this.enable();
+    this.hideSpinner();
   }
 
   #preloadImage = () => {
@@ -126,7 +164,9 @@ if (!customElements.get('add-to-cart-component')) {
  * @extends Component<ProductFormRefs>
  */
 class ProductFormComponent extends Component {
+
   requiredRefs = ['variantId', 'liveRegion'];
+  
   #abortController = new AbortController();
 
   /** @type {number | undefined} */
@@ -134,7 +174,6 @@ class ProductFormComponent extends Component {
 
   connectedCallback() {
     super.connectedCallback();
-
     const { signal } = this.#abortController;
     const target = this.closest('.shopify-section, dialog, product-card');
     target?.addEventListener(ThemeEvents.variantUpdate, this.#onVariantUpdate, { signal });
@@ -143,7 +182,6 @@ class ProductFormComponent extends Component {
 
   disconnectedCallback() {
     super.disconnectedCallback();
-
     this.#abortController.abort();
   }
 
@@ -152,16 +190,21 @@ class ProductFormComponent extends Component {
    *
    * @param {Event} event - The submit event.
    */
-  handleSubmit(event) {
-    const { addToCartTextError } = this.refs;
+  async handleSubmit(event) {
     // Stop default behaviour from the browser
     event.preventDefault();
-
+    
     if (this.#timeout) clearTimeout(this.#timeout);
-
+    
     // Check if the add to cart button is disabled and do an early return if it is
     if (this.refs.addToCartButtonContainer?.refs.addToCartButton?.getAttribute('disabled') === 'true') return;
 
+    // Check if App Block is ready to export
+    const {success, feature} = await this.#checkAppBlockState();
+    if (!success || !feature) return;
+    
+    this.refs.addToCartButtonContainer?.handleStartedAddingToCart();
+    
     // Send the add to cart information to the cart
     const form = this.querySelector('form');
 
@@ -170,110 +213,152 @@ class ProductFormComponent extends Component {
     const formData = new FormData(form);
 
     const cartItemsComponents = document.querySelectorAll('cart-items-component');
+    /** @type {string[]} */
     let cartItemComponentsSectionIds = [];
     cartItemsComponents.forEach((item) => {
       if (item instanceof HTMLElement && item.dataset.sectionId) {
         cartItemComponentsSectionIds.push(item.dataset.sectionId);
       }
-      formData.append('sections', cartItemComponentsSectionIds.join(','));
     });
+    formData.append('sections', cartItemComponentsSectionIds.join(','));
 
-    const fetchCfg = fetchConfig('javascript', { body: formData });
+    /* Convert FormData to JSON for the cart API */
+    const formDataAsJson = Object.fromEntries(formData.entries());
 
-    fetch(Theme.routes.cart_add_url, {
-      ...fetchCfg,
-      headers: {
-        ...fetchCfg.headers,
-        Accept: 'text/html',
-      },
-    })
-      .then((response) => response.json())
-      .then((response) => {
-        if (response.status) {
-          window.dispatchEvent(new CartErrorEvent(this.id, response.message));
+    const productId = formDataAsJson['product-id'];
+    const variantId = formDataAsJson['id'];
 
-          if (!addToCartTextError) return;
-          addToCartTextError.classList.remove('hidden');
+    if (!productId || !variantId) throw new Error('Product ID or variant ID is missing from form data');
 
-          // Reuse the text node if the user is spam-clicking
-          const textNode = addToCartTextError.childNodes[2];
-          if (textNode) {
-            textNode.textContent = response.message;
-          } else {
-            const newTextNode = document.createTextNode(response.message);
-            addToCartTextError.appendChild(newTextNode);
-          }
+    const lineItemProperties = await this.#getLineItemProperties(feature, productId.toString(), variantId.toString());
+    Object.assign(formDataAsJson, {properties: lineItemProperties});
 
-          // Create or get existing error live region for screen readers
-          this.#setLiveRegionText(response.message);
+    this.refs.addToCartButtonContainer?.handleSuccessfulAddToCart();
 
-          this.#timeout = setTimeout(() => {
-            if (!addToCartTextError) return;
-            addToCartTextError.classList.add('hidden');
+    await this.#addToCart(formDataAsJson);
 
-            // Clear the announcement
-            this.#clearLiveRegionText();
-          }, 10000);
+    cartPerformance.measureFromEvent('add:user-action', event);
+  }
 
-          // When we add more than the maximum amount of items to the cart, we need to dispatch a cart update event
-          // because our back-end still adds the max allowed amount to the cart.
-          this.dispatchEvent(
-            new CartAddEvent({}, this.id, {
-              didError: true,
-              source: 'product-form-component',
-              itemCount: Number(formData.get('quantity')) || Number(this.dataset.quantityDefault),
-              productId: this.dataset.productId,
-            })
-          );
+  /**
+   * Adds items to the cart via API call.
+   *
+   * @param {Record<string, any>} formJsonData - The form data containing product information.
+   */
+  async #addToCart(formJsonData) {
+    const fetchCfg = fetchConfig();
 
-          return;
-        } else {
-          const id = formData.get('id');
-
-          if (addToCartTextError) {
-            addToCartTextError.classList.add('hidden');
-            addToCartTextError.removeAttribute('aria-live');
-          }
-
-          if (!id) throw new Error('Form ID is required');
-
-          // Add aria-live region to inform screen readers that the item was added
-          if (this.refs.addToCartButtonContainer?.refs.addToCartButton) {
-            const addToCartButton = this.refs.addToCartButtonContainer.refs.addToCartButton;
-            const addedTextElement = addToCartButton.querySelector('.add-to-cart-text--added');
-            const addedText = addedTextElement?.textContent?.trim() || Theme.translations.added;
-
-            this.#setLiveRegionText(addedText);
-
-            setTimeout(() => {
-              this.#clearLiveRegionText();
-            }, 5000);
-          }
-
-          this.dispatchEvent(
-            new CartAddEvent({}, id.toString(), {
-              source: 'product-form-component',
-              itemCount: Number(formData.get('quantity')) || Number(this.dataset.quantityDefault),
-              productId: this.dataset.productId,
-              sections: response.sections,
-            })
-          );
-        }
-      })
-      .catch((error) => {
-        console.error(error);
-      })
-      .finally(() => {
-        // add more thing to do in here if needed.
-        cartPerformance.measureFromEvent('add:user-action', event);
+    try {
+      const response = await fetch(Theme.routes.cart_add_url, {
+        ...fetchCfg,
+        body: JSON.stringify({ items: [formJsonData] }),
       });
+      
+      const responseData = await response.json();
+      
+      if (responseData.status) {
+        this.#handleCartError(responseData.message, formJsonData);
+      } else {
+        await this.#handleCartSuccess(formJsonData, responseData);
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
+  /**
+   * Handles cart error responses.
+   *
+   * @param {string} message - The error message.
+   * @param {Record<string, any>} formJsonData - The form data containing product information.
+   */
+  #handleCartError(message, formJsonData) {
+    const { addToCartTextError } = this.refs;
+    window.dispatchEvent(new CartErrorEvent(this.id, message));
+    if (!addToCartTextError) return;
+    addToCartTextError.classList.remove('hidden');
+
+    // Reuse the text node if the user is spam-clicking
+    const textNode = addToCartTextError.childNodes[2];
+    if (textNode) {
+      textNode.textContent = message;
+    } else {
+      const newTextNode = document.createTextNode(message);
+      addToCartTextError.appendChild(newTextNode);
+    }
+
+    // Create or get existing error live region for screen readers
+    this.#setLiveRegionText(message);
+
+    this.#timeout = setTimeout(() => {
+      if (!addToCartTextError) return;
+      addToCartTextError.classList.add('hidden');
+
+      // Clear the announcement
+      this.#clearLiveRegionText();
+    }, 10000);
+
+    // When we add more than the maximum amount of items to the cart, we need to dispatch a cart update event
+    // because our back-end still adds the max allowed amount to the cart.
+    this.dispatchEvent(
+      new CartAddEvent({}, this.id, {
+        didError: true,
+        source: 'product-form-component',
+        itemCount: Number(formJsonData['quantity']) || Number(this.dataset.quantityDefault),
+        productId: this.dataset.productId,
+      })
+    );
+  }
+  
+  /**
+   * Handles successful cart addition.
+  *
+  * @param {Record<string, any>} formJsonData - The form data containing product information.
+  * @param {Object} responseData - The response data from the cart API.
+  * @param {any} responseData.sections - The sections data from the response.
+  * @param {any} responseData.items - The items data from the response.
+  */
+  async #handleCartSuccess(formJsonData, responseData) {
+   
+   const { addToCartTextError } = this.refs;
+   const id = formJsonData['id'];
+   
+   if (addToCartTextError) {
+     addToCartTextError.classList.add('hidden');
+     addToCartTextError.removeAttribute('aria-live');
+    }
+    
+    if (!id) throw new Error('Form ID is required');
+
+    // Add aria-live region to inform screen readers that the item was added
+    if (this.refs.addToCartButtonContainer?.refs.addToCartButton) {
+      const addToCartButton = this.refs.addToCartButtonContainer.refs.addToCartButton;
+      const addedTextElement = addToCartButton.querySelector('.add-to-cart-text--added');
+      const addedText = addedTextElement?.textContent?.trim() || Theme.translations.added;
+      this.#setLiveRegionText(addedText);
+      setTimeout(() => {
+        this.#clearLiveRegionText();
+      }, 5000);
+    }
+
+    const cartData = await this.#getCartData();
+    await this.#successAddToCart(cartData?.['token'], responseData?.['items']?.[0]?.key);
+
+    this.dispatchEvent(
+      new CartAddEvent({}, id.toString(), {
+        source: 'product-form-component',
+        itemCount: Number(formJsonData['quantity']) || Number(this.dataset.quantityDefault),
+        productId: this.dataset.productId,
+        sections: responseData.sections,
+      })
+    );
   }
 
   /**
    * @param {*} text
-   */
-  #setLiveRegionText(text) {
-    const liveRegion = this.refs.liveRegion;
+  */
+ #setLiveRegionText(text) {
+   const liveRegion = this.refs.liveRegion;
     liveRegion.textContent = text;
   }
 
@@ -331,6 +416,77 @@ class ProductFormComponent extends Component {
   #onVariantSelected = () => {
     this.refs.addToCartButtonContainer?.disable();
   };
+
+  /* UdoPaint Editor Integration */
+  /* ========================== */
+  /**
+   * Check if the UdoPaints Editor App Block is ready to export.
+   * If it is not, trigger the image uploader when the feature is not gallery-kit.
+   * @returns {Promise<{success: boolean, feature: string | null}>} The App Block state.
+   */
+  async #checkAppBlockState() {
+    try {
+      const {success, feature} = await window.UdoPaintsEditorManager.isReadyToExport();
+      // If the App Block is not ready to export and the feature is not gallery-kit, trigger the image uploader
+      if (!success && feature !== 'gallery-kit') await window.UdoPaintsEditorManager.uploadImage();
+      return {success, feature};
+    } catch (error) {
+      console.error('Error checking App Block state:', error);
+      return {success: false, feature: null};
+    }
+  }
+  
+  /**
+   * Get the cart data.
+   * @returns {Promise<Record<string, any> | null>} The cart data.
+   */
+    async #getCartData() {
+      try {
+        const response = await fetch(`${Theme.routes.cart_url}.json`);
+        const responseData = await response.json();
+        return responseData;
+      } catch (error) {
+        console.error('Error getting cart data:', error);
+        return null;
+      }
+    }
+
+  /**
+   * Get the line item properties for the App Block.
+   * @param {string} feature - The feature of the App Block.
+   * @param {string} productId - The product ID.
+   * @param {string} variantId - The variant ID.
+   * @returns {Promise<Record<string, any>>} The line item properties.
+   */
+  async #getLineItemProperties(feature, productId, variantId) {
+    /** @type {Record<string, any>} */
+    let properties = { _feature: feature };
+    if (feature === 'gallery-kit') return properties;
+    const { originalImageUrl, previewImage, supplierImageUrl } = await window.UdoPaintsEditorManager.onAddToCart({productId, variantId});
+    if (!previewImage || !originalImageUrl || !supplierImageUrl) throw new Error('Failed to get line item properties');
+    properties = {
+      preview_image: previewImage.cdnUrl,
+      _original_image: originalImageUrl,
+      _preview_image: previewImage.url,
+      _supplier_image: supplierImageUrl,
+      ...properties
+    };
+    return properties;
+  }
+
+  /**
+   * Successfully add to cart.
+   * @param {string} cartToken - The cart token.
+   * @param {string} itemKey - The added item key.
+   */
+  async #successAddToCart(cartToken, itemKey) {
+    try {
+      await window.UdoPaintsEditorManager.afterAddToCart({itemKey, cartToken});
+    } catch (error) {
+      console.error('Error when calling afterAddToCart:', error);
+    }
+  }
+  /* ========================== */
 }
 
 if (!customElements.get('product-form-component')) {
