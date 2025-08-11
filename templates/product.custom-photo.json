@@ -179,14 +179,17 @@
                 "title": "UdoPaints Design Preview",
                 "background_color": "",
                 "backend_url": "https://udopaints-custom-app-dev-react-rout.vercel.app",
-                "main_color": "#000000",
+                "main_color": "#2a4759",
                 "privacy_url": "https://yourapp.com/privacy",
                 "default_palette_colors": "24",
+                "app_id": "269386743809",
                 "preview_editor_container_reference_selector_string": "fieldset.variant-option[data-option-name=\"orientation\"]",
                 "preview_editor_container_insert_mode": "after",
+                "preview_editor_remount_event_name": "variant-picker:morphed",
                 "portrait_orientation_selector_string": "fieldset.variant-option[data-option-name=\"orientation\"] input[type=\"radio\"][data-handle=\"portrait\"]",
                 "landscape_orientation_selector_string": "fieldset.variant-option[data-option-name=\"orientation\"] input[type=\"radio\"][data-handle=\"landscape\"]",
-                "preview_palette_colors_container_selector_string": "fieldset.variant-option[data-option-name=\"color-palette\"] legend"
+                "preview_palette_colors_container_selector_string": "fieldset.variant-option[data-option-name=\"color-palette\"] legend",
+                "preview_palette_colors_remount_event_name": "variant-picker:morphed"
               }
             },
             "variant_picker_R3rGDr": {
@@ -199,6 +202,20 @@
                 "padding-block-end": 0,
                 "padding-inline-start": 0,
                 "padding-inline-end": 0
+              },
+              "blocks": {}
+            },
+            "upsell_products_K39kUX": {
+              "type": "upsell-products",
+              "name": "Upsell Products",
+              "settings": {
+                "products": "{{ closest.product.metafields.custom.upsell_products.value }}",
+                "max_products": 4,
+                "show_price": true,
+                "show_description": true,
+                "enable_button_styling": false,
+                "sync_variants": true,
+                "hide_conditions": "Color Palette:pre-printed[Extra Paint];Color Palette:Printed[Extra Paint];Color Palette:Printed (not a painting kit)[Extra Paint]"
               },
               "blocks": {}
             },
@@ -388,6 +405,7 @@
             "divider_VJhene",
             "udopaints_custom_app_admin_product_image_kit_YNqMtD",
             "variant_picker_R3rGDr",
+            "upsell_products_K39kUX",
             "buy_buttons_eYQEYi",
             "accordion_d4bYez"
           ]
@@ -396,9 +414,9 @@
       "settings": {
         "content_width": "content-center-aligned",
         "desktop_media_position": "left",
-        "equal_columns": true,
+        "equal_columns": false,
         "limit_details_width": false,
-        "gap": 48,
+        "gap": 20,
         "color_scheme": "",
         "padding-block-start": 0,
         "padding-block-end": 0

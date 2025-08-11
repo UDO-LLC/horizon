@@ -182,11 +182,14 @@
                 "main_color": "#000000",
                 "privacy_url": "https://yourapp.com/privacy",
                 "default_palette_colors": "24",
+                "app_id": "269386743809",
                 "preview_editor_container_reference_selector_string": "fieldset.variant-option[data-option-name=\"orientation\"]",
                 "preview_editor_container_insert_mode": "after",
+                "preview_editor_remount_event_name": "variant-picker:morphed",
                 "portrait_orientation_selector_string": "fieldset.variant-option[data-option-name=\"orientation\"] input[type=\"radio\"][data-handle=\"portrait\"]",
                 "landscape_orientation_selector_string": "fieldset.variant-option[data-option-name=\"orientation\"] input[type=\"radio\"][data-handle=\"landscape\"]",
-                "preview_palette_colors_container_selector_string": "fieldset.variant-option[data-option-name=\"color-palette\"] legend"
+                "preview_palette_colors_container_selector_string": "fieldset.variant-option[data-option-name=\"color-palette\"] legend",
+                "preview_palette_colors_remount_event_name": "variant-picker:morphed"
               }
             },
             "variant_picker_R3rGDr": {
@@ -205,13 +208,15 @@
             "upsell_products_block": {
               "type": "upsell-products",
               "settings": {
+                "products": "{{ closest.product.metafields.custom.upsell_products.value }}",
                 "max_products": 4,
                 "show_price": true,
                 "show_description": true,
-                "enable_button_styling": true,
+                "enable_button_styling": false,
                 "sync_variants": true,
                 "hide_conditions": "Color Palette:pre-printed[Extra Paint];Color Palette:Printed[Extra Paint]"
-              }
+              },
+              "blocks": {}
             },
             "buy_buttons_eYQEYi": {
               "type": "buy-buttons",
