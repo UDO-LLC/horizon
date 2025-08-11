@@ -202,6 +202,17 @@
               },
               "blocks": {}
             },
+            "upsell_products_block": {
+              "type": "upsell-products",
+              "settings": {
+                "max_products": 4,
+                "show_price": true,
+                "show_description": true,
+                "enable_button_styling": true,
+                "sync_variants": true,
+                "hide_conditions": "Color Palette:pre-printed[Extra Paint];Color Palette:Printed[Extra Paint]"
+              }
+            },
             "buy_buttons_eYQEYi": {
               "type": "buy-buttons",
               "settings": {
@@ -387,6 +398,7 @@
             "divider_VJhene",
             "udopaints_custom_app_admin_product_image_kit_YNqMtD",
             "variant_picker_R3rGDr",
+            "upsell_products_block",
             "buy_buttons_eYQEYi",
             "accordion_d4bYez"
           ]

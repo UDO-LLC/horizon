@@ -1,0 +1,189 @@
+{%- doc -%}
+  Renders upsell products block with interactive checkboxes.
+  This block displays recommended products above the add to cart button with selection functionality.
+{%- enddoc -%}
+
+<script
+  src="{{ 'upsell-products.js' | asset_url }}"
+  type="module"
+></script>
+
+{% liquid
+  assign block_settings = block.settings
+  assign upsell_products = block_settings.products
+%}
+
+<div 
+  class="product-block product-block--upsell" 
+  {{ block.shopify_attributes }}
+>
+  {%- render 'upsell-products-styles' -%}
+  
+  {% if upsell_products != blank %}
+    <upsell-products 
+      class="upsell-products" 
+      data-enable-button-styling="{{ block_settings.enable_button_styling | default: false }}"
+      data-sync-variants="{{ block_settings.sync_variants | default: true }}"
+      data-hide-conditions="{{ block_settings.hide_conditions | escape }}"
+      data-main-product-selected-variant-id="{{ product.selected_or_first_available_variant.id }}"
+      data-testid="upsell-products-block"
+    >
+      <script type="application/json" data-main-product-options>{{ product.options_with_values | json }}</script>
+      <script type="application/json" data-main-product-variants>{{ product.variants | json }}</script>
+      {% for upsell_product in upsell_products limit: block_settings.max_products %}
+        <label class="upsell-product__item" data-upsell-product="{{ upsell_product.id }}">
+          <img 
+            src="{{ upsell_product.featured_image | image_url: width: 80 }}" 
+            alt="{{ upsell_product.title }}" 
+            width="80" 
+            height="80"
+            loading="lazy"
+          >
+          <div class="upsell-product__content">
+            <h4>{{ upsell_product.title }}</h4>
+            {% if block_settings.show_description and upsell_product.description != blank %}
+              <p class="upsell-product__description">
+                {{ upsell_product.description | strip_html | truncate: 100 }}
+              </p>
+            {% endif %}
+            {% if block_settings.show_price %}
+              <p class="upsell-product__price">
+                <span class="upsell-product__current-price"></span>
+                <span class="upsell-product__compare-price"></span>
+              </p>
+            {% endif %}
+          </div>
+          <input 
+            type="checkbox" 
+            class="upsell-product__checkbox-input" 
+            name="upsell_{{ upsell_product.id }}"
+            value="{{ upsell_product.id }}"
+            data-upsell-id="{{ upsell_product.id }}" 
+          >
+          <div class="upsell-product__checkbox"></div>
+          <script type="application/json" data-upsell-variants data-upsell-id="{{ upsell_product.id }}">{{ upsell_product.variants | json }}</script>
+          <script type="application/json" data-upsell-option-names data-upsell-id="{{ upsell_product.id }}">{{ upsell_product.options | json }}</script>
+        </label>
+      {% endfor %}
+    </upsell-products>
+  {% else %}
+    {% comment %} Show placeholder in theme editor {% endcomment %}
+    {% if request.visual_preview_mode %}
+      <upsell-products class="upsell-products" data-testid="upsell-products-block">
+        {% for i in (1..block_settings.max_products) %}
+          <label class="upsell-product__item" data-upsell-product="placeholder-{{ i }}">
+            <img 
+              src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='80' viewBox='0 0 80 80'%3E%3Crect width='80' height='80' fill='%23f3f4f6'/%3E%3Ctext x='50%25' y='50%25' text-anchor='middle' dy='.3em' fill='%239ca3af' font-size='12'%3EImage%3C/text%3E%3C/svg%3E"
+              alt="Placeholder" 
+              width="80" 
+              height="80"
+            >
+            <div class="upsell-product__content">
+              <h4>Sample Upsell Product {{ i }}</h4>
+              <p class="upsell-product__description">This is a sample description for the upsell product.</p>
+              <p class="upsell-product__price">
+                <span class="upsell-product__current-price">$19.99</span>
+              </p>
+            </div>
+            <input 
+              type="checkbox" 
+              class="upsell-product__checkbox-input" 
+              name="upsell_placeholder_{{ i }}"
+              value="placeholder_{{ i }}"
+              data-upsell-id="placeholder_{{ i }}" 
+              data-upsell-variants="[]"
+              data-upsell-option-name="[]"
+            >
+            <div class="upsell-product__checkbox"></div>
+          </label>
+        {% endfor %}
+      </upsell-products>
+    {% endif %}
+  {% endif %}
+</div>
+
+{% schema %}
+{
+  "name": "Upsell Products",
+  "blocks": [
+    {
+      "type": "text"
+    }
+  ],
+  "settings": [
+    {
+      "type": "header",
+      "content": "Product Selection"
+    },
+    {
+      "type": "product_list",
+      "id": "products",
+      "label": "Select products to upsell",
+      "limit": 10
+    },
+    {
+      "type": "range",
+      "id": "max_products",
+      "label": "Maximum number of products",
+      "min": 2,
+      "max": 10,
+      "step": 1,
+      "default": 4
+    },
+    {
+      "type": "header",
+      "content": "Display Options"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_price",
+      "label": "Show price",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_description",
+      "label": "Show description",
+      "default": true
+    },
+    {
+      "type": "header",
+      "content": "Advanced Features"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_button_styling",
+      "label": "Enable add to cart button styling",
+      "default": false,
+      "info": "When enabled, the add to cart button will show visual indicators when upsell products are selected"
+    },
+    {
+      "type": "checkbox",
+      "id": "sync_variants",
+      "label": "Enable variant synchronization",
+      "default": true,
+      "info": "When enabled, upsell product variants will automatically sync with the main product's variant selection if the option name and value match"
+    },
+    {
+      "type": "textarea",
+      "id": "hide_conditions",
+      "label": "Hide conditions",
+      "info": "Format: OptionName:Value[Upsell Product Name, Upsell Product Name1];OptionName1:Value1[Upsell Product Name1] (e.g., Colors Palette:Pre-Print[Extra Paints, Extra Paints 2];Orientation:Landscape[Extra Paints]). Leave empty to always show.",
+      "default": "Color Palette:pre-printed[Extra Paint];Color Palette:Printed[Extra Paint]"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Upsell Products",
+      "category": "Product",
+      "settings": {
+        "max_products": 4,
+        "show_price": true,
+        "show_description": true,
+        "enable_button_styling": true,
+        "sync_variants": true
+      }
+    }
+  ]
+}
+{% endschema %}

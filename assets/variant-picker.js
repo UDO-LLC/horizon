@@ -36,7 +36,10 @@ export default class VariantPicker extends Component {
     if (!selectedOption) return;
 
     this.updateSelectedOption(event.target);
-    this.dispatchEvent(new VariantSelectedEvent({ id: selectedOption.dataset.optionValueId ?? '' }));
+    this.dispatchEvent(new VariantSelectedEvent({
+      id: selectedOption.dataset.optionValueId ?? '',
+      variantId: selectedOption.dataset.variantId ?? ''
+    }));
 
     const isOnProductPage =
       this.dataset.templateProductMatch === 'true' &&

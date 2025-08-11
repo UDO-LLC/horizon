@@ -13,6 +13,7 @@ declare global {
     loadFeatures(features: ShopifyFeature[], callback?: LoadCallback): void;
     ModelViewerUI?: ModelViewer;
     visualPreviewMode: boolean;
+    formatMoney(amount: number): string;
   }
 
   interface Theme {

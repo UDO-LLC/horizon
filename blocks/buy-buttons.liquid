@@ -64,6 +64,11 @@
           ref="variantId"
           value="{{ product.selected_or_first_available_variant.id }}"
         >
+        <input
+          type="hidden"
+          name="product-title"
+          value="{{ product.title }}"
+        >
         <div
           class="product-form-buttons spacing-style{% if block_settings.stacking %} product-form-buttons--stacked{% endif %}"
           style="{% render 'spacing-style', settings: block_settings %}"

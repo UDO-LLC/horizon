@@ -3,6 +3,7 @@ import { fetchConfig, onAnimationEnd, preloadImage } from '@theme/utilities';
 import { ThemeEvents, CartAddEvent, CartErrorEvent, VariantUpdateEvent } from '@theme/events';
 import { cartPerformance } from '@theme/performance';
 import { morph } from '@theme/morph';
+import { UPSELL_PRODUCT_PREFIX } from './upsell-products.js';
 
 export const ADD_TO_CART_TEXT_ANIMATION_DURATION = 2000;
 
@@ -26,7 +27,7 @@ export class AddToCartComponent extends Component {
     super.connectedCallback();
     this.addEventListener('pointerenter', this.#preloadImage);
   }
-  
+
   disconnectedCallback() {
     super.disconnectedCallback();
     if (this.#animationTimeout) clearTimeout(this.#animationTimeout);
@@ -69,7 +70,7 @@ export class AddToCartComponent extends Component {
   handleClick(event) {
     this.listenToAppBlockState();
   }
-  
+
   listenToAppBlockState() {
     window.UdoPaintsEditorManager.onStateChange((params) => {
       if (params.state === 'upload-state:loading') {
@@ -152,6 +153,14 @@ if (!customElements.get('add-to-cart-component')) {
 }
 
 /**
+ * @typedef {object} UpsellProduct
+ * @property {string} id - The ID of the upsell product.
+ * @property {string} title - The title of the upsell product.
+ * @property {number} quantity - The quantity of the upsell product.
+ * @property {Record<string, any>} properties - The properties of the upsell product.
+ */
+
+/**
  * A custom element that manages a product form.
  *
  * @typedef {object} ProductFormRefs
@@ -166,7 +175,7 @@ if (!customElements.get('add-to-cart-component')) {
 class ProductFormComponent extends Component {
 
   requiredRefs = ['variantId', 'liveRegion'];
-  
+
   #abortController = new AbortController();
 
   /** @type {number | undefined} */
@@ -193,18 +202,18 @@ class ProductFormComponent extends Component {
   async handleSubmit(event) {
     // Stop default behaviour from the browser
     event.preventDefault();
-    
+
     if (this.#timeout) clearTimeout(this.#timeout);
-    
+
     // Check if the add to cart button is disabled and do an early return if it is
     if (this.refs.addToCartButtonContainer?.refs.addToCartButton?.getAttribute('disabled') === 'true') return;
 
     // Check if App Block is ready to export
-    const {success, feature} = await this.#checkAppBlockState();
+    const { success, feature } = await this.#checkAppBlockState();
     if (!success || !feature) return;
-    
+
     this.refs.addToCartButtonContainer?.handleStartedAddingToCart();
-    
+
     // Send the add to cart information to the cart
     const form = this.querySelector('form');
 
@@ -231,11 +240,13 @@ class ProductFormComponent extends Component {
     if (!productId || !variantId) throw new Error('Product ID or variant ID is missing from form data');
 
     const lineItemProperties = await this.#getLineItemProperties(feature, productId.toString(), variantId.toString());
-    Object.assign(formDataAsJson, {properties: lineItemProperties});
+    Object.assign(formDataAsJson, { properties: lineItemProperties });
+
+    const { cleanFormJsonData, upsellProducts } = this.#detectUpsellProducts(formDataAsJson);
 
     this.refs.addToCartButtonContainer?.handleSuccessfulAddToCart();
 
-    await this.#addToCart(formDataAsJson);
+    await this.#addToCart(cleanFormJsonData, upsellProducts);
 
     cartPerformance.measureFromEvent('add:user-action', event);
   }
@@ -244,18 +255,19 @@ class ProductFormComponent extends Component {
    * Adds items to the cart via API call.
    *
    * @param {Record<string, any>} formJsonData - The form data containing product information.
+   * @param {UpsellProduct[]} upsellProducts - The upsell products.
    */
-  async #addToCart(formJsonData) {
+  async #addToCart(formJsonData, upsellProducts) {
     const fetchCfg = fetchConfig();
 
     try {
       const response = await fetch(Theme.routes.cart_add_url, {
         ...fetchCfg,
-        body: JSON.stringify({ items: [formJsonData] }),
+        body: JSON.stringify({ items: [formJsonData, ...upsellProducts] }),
       });
-      
+
       const responseData = await response.json();
-      
+
       if (responseData.status) {
         this.#handleCartError(responseData.message, formJsonData);
       } else {
@@ -309,7 +321,7 @@ class ProductFormComponent extends Component {
       })
     );
   }
-  
+
   /**
    * Handles successful cart addition.
   *
@@ -319,15 +331,15 @@ class ProductFormComponent extends Component {
   * @param {any} responseData.items - The items data from the response.
   */
   async #handleCartSuccess(formJsonData, responseData) {
-   
-   const { addToCartTextError } = this.refs;
-   const id = formJsonData['id'];
-   
-   if (addToCartTextError) {
-     addToCartTextError.classList.add('hidden');
-     addToCartTextError.removeAttribute('aria-live');
+
+    const { addToCartTextError } = this.refs;
+    const id = formJsonData['id'];
+
+    if (addToCartTextError) {
+      addToCartTextError.classList.add('hidden');
+      addToCartTextError.removeAttribute('aria-live');
     }
-    
+
     if (!id) throw new Error('Form ID is required');
 
     // Add aria-live region to inform screen readers that the item was added
@@ -357,8 +369,8 @@ class ProductFormComponent extends Component {
   /**
    * @param {*} text
   */
- #setLiveRegionText(text) {
-   const liveRegion = this.refs.liveRegion;
+  #setLiveRegionText(text) {
+    const liveRegion = this.refs.liveRegion;
     liveRegion.textContent = text;
   }
 
@@ -426,30 +438,30 @@ class ProductFormComponent extends Component {
    */
   async #checkAppBlockState() {
     try {
-      const {success, feature} = await window.UdoPaintsEditorManager.isReadyToExport();
+      const { success, feature } = await window.UdoPaintsEditorManager.isReadyToExport();
       // If the App Block is not ready to export and the feature is not gallery-kit, trigger the image uploader
       if (!success && feature !== 'gallery-kit') await window.UdoPaintsEditorManager.uploadImage();
-      return {success, feature};
+      return { success, feature };
     } catch (error) {
       console.error('Error checking App Block state:', error);
-      return {success: false, feature: null};
+      return { success: false, feature: null };
     }
   }
-  
+
   /**
    * Get the cart data.
    * @returns {Promise<Record<string, any> | null>} The cart data.
    */
-    async #getCartData() {
-      try {
-        const response = await fetch(`${Theme.routes.cart_url}.json`);
-        const responseData = await response.json();
-        return responseData;
-      } catch (error) {
-        console.error('Error getting cart data:', error);
-        return null;
-      }
+  async #getCartData() {
+    try {
+      const response = await fetch(`${Theme.routes.cart_url}.json`);
+      const responseData = await response.json();
+      return responseData;
+    } catch (error) {
+      console.error('Error getting cart data:', error);
+      return null;
     }
+  }
 
   /**
    * Get the line item properties for the App Block.
@@ -462,7 +474,7 @@ class ProductFormComponent extends Component {
     /** @type {Record<string, any>} */
     let properties = { _feature: feature };
     if (feature === 'gallery-kit') return properties;
-    const { originalImageUrl, previewImage, supplierImageUrl } = await window.UdoPaintsEditorManager.onAddToCart({productId, variantId});
+    const { originalImageUrl, previewImage, supplierImageUrl } = await window.UdoPaintsEditorManager.onAddToCart({ productId, variantId });
     if (!previewImage || !originalImageUrl || !supplierImageUrl) throw new Error('Failed to get line item properties');
     properties = {
       preview_image: previewImage.cdnUrl,
@@ -481,12 +493,52 @@ class ProductFormComponent extends Component {
    */
   async #successAddToCart(cartToken, itemKey) {
     try {
-      await window.UdoPaintsEditorManager.afterAddToCart({itemKey, cartToken});
+      await window.UdoPaintsEditorManager.afterAddToCart({ itemKey, cartToken });
     } catch (error) {
       console.error('Error when calling afterAddToCart:', error);
     }
   }
+
+  /* Upsell Products */
   /* ========================== */
+  /**
+   * Detect upsell products in the form data.
+   * @param {Record<string, any>} formJsonData - The form data containing product information.
+   * @returns {{cleanFormJsonData: Record<string, any>, upsellProducts: UpsellProduct[]}} The cleaned form data and the upsell products.
+   */
+  #detectUpsellProducts(formJsonData) {
+    const upsellProductsFormData = Object.entries(formJsonData).filter(([key]) => key.startsWith(UPSELL_PRODUCT_PREFIX));
+    if (upsellProductsFormData.length === 0) return { cleanFormJsonData: formJsonData, upsellProducts: [] };
+    const productTitle = formJsonData['product-title'];
+    if (!productTitle) {
+      console.error('Product title is missing from form data');
+      window.UdoPaintsEditorManager.onError('Product title is missing from form data');
+      return { cleanFormJsonData: formJsonData, upsellProducts: [] };
+    }
+    /** @type {UpsellProduct[]} */ const upsellProducts = [];
+    Object.entries(formJsonData).forEach(([key, value]) => {
+      if (key.startsWith(UPSELL_PRODUCT_PREFIX)) {
+        upsellProducts.push({
+          id: key.replace(UPSELL_PRODUCT_PREFIX, ''),
+          title: value,
+          quantity: 1,
+          properties: {
+            "Product": productTitle,
+          }
+        });
+      }
+    });
+    // Remove the upsell products from the form data
+    const cleanFormJsonData = Object.fromEntries(Object.entries(formJsonData)
+      .filter(([key]) => !key.startsWith(UPSELL_PRODUCT_PREFIX)));
+    const formDataProperties = {
+      ...cleanFormJsonData['properties'],
+      // Add the upsell products to the properties
+      ...Object.fromEntries(upsellProductsFormData),
+    };
+    Object.assign(cleanFormJsonData, { properties: formDataProperties });
+    return { cleanFormJsonData, upsellProducts };
+  }
 }
 
 if (!customElements.get('product-form-component')) {
