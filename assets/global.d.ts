@@ -74,6 +74,11 @@ declare global {
   }
 
   // UdoPaintsEditor App Block Interface
+  interface AppBlockImage {
+      url: string;
+      cdnUrl: string;
+  }
+  
   interface UdoPaintsEditor {
     /**
      * Called when a product is added to cart
@@ -87,12 +92,9 @@ declare global {
       feature?: string;
       error?: string;
       orientation?: string;
-      previewImage?: {
-        url: string;
-        cdnUrl: string;
-      };
-      originalImageUrl?: string;
-      supplierImageUrl?: string;
+      previewImage?: AppBlockImage;
+      originalImage?: AppBlockImage;
+      supplierImage?: AppBlockImage;
     }>;
 
     /**

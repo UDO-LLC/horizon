@@ -474,13 +474,15 @@ class ProductFormComponent extends Component {
     /** @type {Record<string, any>} */
     let properties = { _feature: feature };
     if (feature === 'gallery-kit') return properties;
-    const { originalImageUrl, previewImage, supplierImageUrl } = await window.UdoPaintsEditorManager.onAddToCart({ productId, variantId });
-    if (!previewImage || !originalImageUrl || !supplierImageUrl) throw new Error('Failed to get line item properties');
+    const { originalImage, previewImage, supplierImage } = await window.UdoPaintsEditorManager.onAddToCart({ productId, variantId });
+    if (!previewImage || !originalImage || !supplierImage) throw new Error('Failed to get line item properties');
     properties = {
       preview_image: previewImage.cdnUrl,
-      _original_image: originalImageUrl,
-      _preview_image: previewImage.url,
-      _supplier_image: supplierImageUrl,
+      _supplier_image: supplierImage.cdnUrl,
+      _original_image: originalImage.cdnUrl,
+      _tmp_preview_image: previewImage.url,
+      _tmp_supplier_image: supplierImage.url,
+      _tmp_original_image: originalImage.url,
       ...properties
     };
     return properties;
