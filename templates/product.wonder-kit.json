@@ -178,17 +178,19 @@
               "settings": {
                 "title": "UdoPaints Design Preview",
                 "background_color": "",
-                "backend_url": "https://udopaints-custom-app-dev-react-rout.vercel.app",
                 "main_color": "#000000",
                 "privacy_url": "https://yourapp.com/privacy",
                 "default_palette_colors": "24",
+                "backend_url": "https://udopaints-custom-app-dev-react-rout.vercel.app",
                 "app_id": "269386743809",
+                "shopify_file_cdn_prefix": "https://cdn.shopify.com/s/files/1/0764/4912/0468/files",
                 "preview_editor_container_reference_selector_string": "fieldset.variant-option[data-option-name=\"orientation\"]",
                 "preview_editor_container_insert_mode": "after",
                 "preview_editor_remount_event_name": "variant-picker:morphed",
                 "portrait_orientation_selector_string": "fieldset.variant-option[data-option-name=\"orientation\"] input[type=\"radio\"][data-handle=\"portrait\"]",
                 "landscape_orientation_selector_string": "fieldset.variant-option[data-option-name=\"orientation\"] input[type=\"radio\"][data-handle=\"landscape\"]",
-                "preview_palette_colors_container_selector_string": "fieldset.variant-option[data-option-name=\"color-palette\"] legend",
+                "preview_palette_colors_container_selector_string": "form.variant-picker__form",
+                "preview_palette_colors_button_position": "static",
                 "preview_palette_colors_remount_event_name": "variant-picker:morphed"
               }
             },
