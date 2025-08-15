@@ -1,3 +1,9 @@
+> ⚠️ **This repository is no longer maintained.**
+>
+> Active development has moved to the forked theme: [@UDO-LLC/horizon](https://github.com/UDO-LLC/horizon).
+>
+> Please use [@UDO-LLC/horizon](https://github.com/UDO-LLC/horizon) for the latest updates, issues, and development!
+
 # UdoPaints Theme - Horizon
 
 A custom Shopify theme based on the Horizon theme template, designed for UdoPaints with future custom features planned.
