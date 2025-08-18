@@ -510,22 +510,33 @@ class ProductFormComponent extends Component {
   async #getLineItemProperties(feature, productId, variantId) {
     /** @type {Record<string, any>} */
     let properties = { _feature: feature };
-    const { originalImage, previewImage, supplierImage } = await window.UdoPaintsEditorManager.onAddToCart({ productId, variantId });
+    const { originalImage, previewImage, supplierImage, generatedImage } = await window.UdoPaintsEditorManager.onAddToCart({ productId, variantId });
     if (feature === 'gallery-kit') {
       if (!supplierImage) throw new Error('Failed to get supplier image from Gallery Kit product');
       properties = {
         _supplier_image: supplierImage.cdnUrl || supplierImage.url,
         ...properties
       };
-    } else {
-      if (!previewImage || !originalImage || !supplierImage) throw new Error('Failed to get line item properties');
+      return properties;
+    }
+    if (!previewImage || !originalImage || !supplierImage) throw new Error('Failed to get line item properties');
+    properties = {
+      preview_image: previewImage.cdnUrl,
+      _supplier_image: supplierImage.cdnUrl,
+      _original_image: originalImage.cdnUrl,
+      _tmp_preview_image: previewImage.url,
+      _tmp_supplier_image: supplierImage.url,
+      _tmp_original_image: originalImage.url,
+      ...properties
+    };
+    if (feature === 'wonder-kit') {
+      if (!generatedImage) {
+        window.UdoPaintsEditorManager.onError('Failed to get generated image from Wonder Kit product');
+        return properties;
+      }
       properties = {
-        preview_image: previewImage.cdnUrl,
-        _supplier_image: supplierImage.cdnUrl,
-        _original_image: originalImage.cdnUrl,
-        _tmp_preview_image: previewImage.url,
-        _tmp_supplier_image: supplierImage.url,
-        _tmp_original_image: originalImage.url,
+        _generated_image: generatedImage.cdnUrl,
+        _tmp_generated_image: generatedImage.url,
         ...properties
       };
     }

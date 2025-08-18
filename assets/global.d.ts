@@ -95,6 +95,7 @@ declare global {
       previewImage?: AppBlockImage;
       originalImage?: AppBlockImage;
       supplierImage?: AppBlockImage;
+      generatedImage?: AppBlockImage;
     }>;
 
     /**
