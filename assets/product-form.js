@@ -306,7 +306,7 @@ class ProductFormComponent extends Component {
       const responseData = await response.json();
 
       if (responseData.status) {
-        this.#handleCartError(responseData.message, formJsonData);
+        this.#handleCartError(responseData, formJsonData);
       } else {
         await this.#handleCartSuccess(formJsonData, responseData);
       }
@@ -318,12 +318,13 @@ class ProductFormComponent extends Component {
   /**
    * Handles cart error responses.
    *
-   * @param {string} message - The error message.
+   * @param {any} responseData - The response data from the cart API.
    * @param {Record<string, any>} formJsonData - The form data containing product information.
    */
-  #handleCartError(message, formJsonData) {
+  #handleCartError(responseData, formJsonData) {
     const { addToCartTextError } = this.refs;
-    window.dispatchEvent(new CartErrorEvent(this.id, message));
+    const message = responseData.message;
+    window.dispatchEvent(new CartErrorEvent(this.id, message, responseData.description, responseData.errors));
     if (!addToCartTextError) return;
     addToCartTextError.classList.remove('hidden');
 
