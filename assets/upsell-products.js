@@ -368,8 +368,6 @@ class UpsellProducts extends Component {
   #bestMatchUpsellVariants;
   /** @type {Set.<string>} */
   #hiddenUpsellProducts;
-  /** @type {string | null} */
-  #originalDisplayValue;
   /** @type {Option[]} */
   #mainProductOptions;
   /** @type {Variant[]} */
@@ -395,7 +393,6 @@ class UpsellProducts extends Component {
     this.#upsellOptions = {};
     this.#bestMatchUpsellVariants = [];
     this.#hiddenUpsellProducts = new Set();
-    this.#originalDisplayValue = null;
     this.#mainProductOptions = [];
     this.#mainProductVariants = [];
   }
@@ -412,13 +409,11 @@ class UpsellProducts extends Component {
   }
 
   async init() {
-    await this.#checkUdoPaintsEditor();
-    this.#setupCheckboxListeners();
-    
     if (this.#syncVariants) {
       this.#initOptionsAndVariants();
     }
-    
+    await this.#checkUdoPaintsEditor();
+    this.#setupCheckboxListeners();
     this.#setupVariantChangeListener();
   }
 
@@ -442,6 +437,7 @@ class UpsellProducts extends Component {
     
     if (isReady) {
       this.showAllUpsellProducts();
+
       const initialMainVariant = VariantMatcher.mapMainProductVariants(
         this.#mainProductSelectedVariantId,
         this.#mainProductOptions,
@@ -537,6 +533,7 @@ class UpsellProducts extends Component {
    * @param {Object.<string, string>} mainProductVariants - The main product variants
    */
   #updateBestMatchVariants(mainProductVariants) {
+
     this.#bestMatchUpsellVariants = Array.from(this.#checkboxes)
       .map(checkbox => ({
         checkbox: checkbox,
@@ -556,10 +553,11 @@ class UpsellProducts extends Component {
     this.#mainProductOptions = JSON.parse(
       this.querySelector('script[data-main-product-options]')?.textContent || '[]'
     );
+
     this.#mainProductVariants = JSON.parse(
       this.querySelector('script[data-main-product-variants]')?.textContent || '[]'
     );
-    
+
     this.#checkboxes.forEach(checkbox => {
       const upsellId = checkbox.dataset.upsellId;
       if (!upsellId) return;
@@ -669,6 +667,7 @@ class UpsellProducts extends Component {
    * @returns {boolean} Whether the price was set successfully
    */
   #setUpsellProductPrice(upsellProductId, newPrice, newComparePrice = null) {
+
     if (!upsellProductId || newPrice === null || newPrice === undefined) {
       console.warn('UpsellProducts: Invalid parameters provided for setUpsellProductPrice');
       return false;
@@ -816,14 +815,8 @@ class UpsellProducts extends Component {
   hideUpsellProduct(upsellId, item) {
     if (!item || !upsellId) return;
     
-    // Store the current display value before hiding
-    const currentDisplay = window.getComputedStyle(item).display;
-    if (currentDisplay !== 'none') {
-      this.#originalDisplayValue = currentDisplay;
-    }
-    
     this.#hiddenUpsellProducts.add(upsellId);
-    item.style.display = 'none';
+    item.classList.add('upsell-product--hidden');
 
     // Uncheck the checkbox if it's hidden
     const checkbox = /** @type {HTMLInputElement} */ (item.querySelector('.upsell-product__checkbox-input'));
@@ -842,14 +835,7 @@ class UpsellProducts extends Component {
     if (!item) return;
     
     this.#hiddenUpsellProducts.delete(upsellId || '');
-    
-    // Restore the original display value
-    if (this.#originalDisplayValue) {
-      item.style.display = this.#originalDisplayValue;
-    } else {
-      // Fallback to 'block' if no original value is stored
-      item.style.display = 'block';
-    }
+    item.classList.remove('upsell-product--hidden');
   }
 
   /**
