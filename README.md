@@ -32,8 +32,6 @@ udopaints-theme-horizon/
 ├── snippets/                 # Reusable template snippets
 └── templates/                # Page templates
     ├── product.json          # Standard product template
-    ├── product.custom-photo.json  # Custom photo product template
-    ├── product.wonder-kit.json    # Wonder kit product template
     └── *.json               # Other template configurations
 ```
 
@@ -57,10 +55,7 @@ udopaints-theme-horizon/
 
 ### Page Templates
 - **Homepage** (`index.json`) - Hero sections, featured products, content blocks
-- **Product Pages**:
-  - `product.json` - Standard product template
-  - `product.custom-photo.json` - Custom photo product template
-  - `product.wonder-kit.json` - Wonder kit product template
+- **Product Pages** (`product.json`) - Product templates with enhanced functionality
 - **Collection Pages** (`collection.json`) - Product grids, filters, sorting
 - **Blog & Articles** (`blog.json`, `article.json`) - Content management
 - **Cart & Checkout** (`cart.json`) - Shopping cart functionality
@@ -72,20 +67,20 @@ udopaints-theme-horizon/
 
 ### Prerequisites
 - [Shopify CLI](https://shopify.dev/themes/tools/cli) (latest version)
-- [Node.js](https://nodejs.org/) (v16 or higher)
+- [Node.js](https://nodejs.org/) (v18 or higher)
 - [Git](https://git-scm.com/)
 
 ### Installation
 
 1. **Clone the repository**
    ```bash
-   git clone <repository-url>
+   git clone https://github.com/your-username/udopaints-theme-horizon.git
    cd udopaints-theme-horizon
    ```
 
 2. **Install Shopify CLI** (if not already installed)
    ```bash
-   npm install -g @shopify/cli @shopify/theme
+   npm install -g @shopify/cli
    ```
 
 3. **Login to Shopify**
@@ -110,11 +105,11 @@ shopify theme push
 # Pull theme from store
 shopify theme pull
 
-# Deploy to production
-shopify theme deploy
-
 # Check theme for issues
 shopify theme check
+
+# List themes
+shopify theme list
 ```
 
 ## 🎨 Customization
@@ -127,10 +122,6 @@ The theme can be customized through the Shopify admin panel under **Online Store
 - **Layout**: Page width, spacing, and grid settings
 - **Header & Footer**: Logo, navigation, and footer content
 - **Product Display**: Grid layouts, hover effects, quick add options
-
-### Custom Features
-
-The theme includes several custom features that can be configured through the theme settings and custom code. These features are designed to enhance the user experience and provide specialized functionality for specific product types.
 
 ### Code Customization
 
@@ -187,23 +178,6 @@ class CustomFeature {
 {% endschema %}
 ```
 
-## 🔧 Custom Integrations
-
-The theme includes several custom integrations that enhance functionality:
-
-### Custom App Blocks
-The theme supports custom app blocks for enhanced functionality and integrations with specialized applications.
-
-### Enhanced JavaScript Modules
-Custom JavaScript modules provide:
-- Advanced state management
-- Enhanced user interactions
-- Performance optimizations
-- Custom error handling
-
-### Specialized Product Handling
-The theme includes specialized handling for different product types with custom templates and enhanced functionality.
-
 ## 📁 Key Files
 
 ### Assets
@@ -213,8 +187,6 @@ The theme includes specialized handling for different product types with custom 
 - Icon SVGs and media assets
 
 ### Templates
-- `product.custom-photo.json` - Custom photo product template
-- `product.wonder-kit.json` - Wonder kit product template
 - `product.json` - Standard product template with enhancements
 
 ### Snippets
@@ -236,14 +208,13 @@ The theme supports multiple languages through the `locales/` directory:
 shopify theme dev --store=your-store.myshopify.com
 ```
 
-### Staging
+### Push to Store
 ```bash
-shopify theme push --theme=staging-theme-id
-```
+# Push to specific theme
+shopify theme push --theme=theme-id
 
-### Production
-```bash
-shopify theme push --theme=production-theme-id
+# Push to live theme
+shopify theme push --live
 ```
 
 ## 📝 Version Control
@@ -285,16 +256,10 @@ shopify theme push --theme=production-theme-id
 - Minimize JavaScript and CSS
 - Use lazy loading for images
 
-**Custom features not working:**
-- Check theme settings configuration
-- Verify custom app blocks are properly configured
-- Review browser console for errors
-
 ## 📞 Support
 
 For technical support or questions about this theme:
 
-- **UdoPaints Support**: Contact UdoPaints development team
 - **Shopify Documentation**: [Shopify Theme Development](https://help.shopify.com/en/manual/online-store/themes)
 - **Theme Support**: [Shopify Support](https://support.shopify.com/)
 - **Development Tools**: [Shopify CLI Documentation](https://shopify.dev/themes/tools/cli)
