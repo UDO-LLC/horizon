@@ -479,7 +479,10 @@ class ProductFormComponent extends Component {
       const { success, feature, error } = await window.UdoPaintsEditorManager.isReadyToExport();
       if (!success && feature !== 'gallery-kit') {
         // If there is an error, disable the add to cart button
-        if (error) this.refs.addToCartButtonContainer?.disable();
+        if (error) {
+          this.refs.addToCartButtonContainer?.disable();
+          console.warn('UdoPaints Editor App Block is not ready:', error);
+        }
         // If there is no error, trigger the image uploader
         else await window.UdoPaintsEditorManager.uploadImage();
       } else {

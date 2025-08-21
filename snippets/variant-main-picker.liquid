@@ -107,7 +107,54 @@
                     mode: 'unscaled'
                   %}
                 {% else %}
-                  <span class="variant-option__button-label__text">{{ product_option_value | escape }}</span>
+                  <div class="variant-option__button-label__content">
+                    {% comment %}Display canvas format icon and content in two-column layout{% endcomment %}
+                    {% if block_settings.enable_custom_settings and product_option.name == block_settings.canvas_format_name %}
+                      <div class="variant-option__canvas-layout">
+                        {% if product_option_value.name == block_settings.rolled_canvas_format_value and block_settings.rolled_canvas_format_icon %}
+                          <img src="{{ block_settings.rolled_canvas_format_icon | image_url }}" class="variant-option__icon" alt="Rolled canvas format" width="48" height="48">
+                        {% elsif product_option_value.name == block_settings.stretched_canvas_format_value and block_settings.stretched_canvas_format_icon %}
+                            <img src="{{ block_settings.stretched_canvas_format_icon | image_url }}" class="variant-option__icon" alt="Stretched canvas format" width="48" height="48">
+                        {% endif %}
+                        <div class="variant-option__canvas-content">
+                          <div class="variant-option__canvas-title">
+                            {{ product_option_value | escape }}
+                          </div>
+                          {% assign canvas_description = '' %}
+                          {% if product_option_value.name == block_settings.rolled_canvas_format_value %}
+                            {% assign canvas_description = block_settings.rolled_canvas_format_value_description %}
+                          {% elsif product_option_value.name == block_settings.stretched_canvas_format_value %}
+                            {% assign canvas_description = block_settings.stretched_canvas_format_value_description %}
+                          {% endif %}
+                          {% if canvas_description != blank %}
+                            <div class="variant-option__canvas-features">{{ canvas_description | newline_to_br }}</div>
+                          {% endif %}
+                        </div>
+                      </div>
+                    {% else %}
+                      <div class="variant-option__button-label__text-content">
+                        <span class="variant-option__button-label__text">
+                          {{ product_option_value | escape }}
+                        </span>
+                        {% comment %}Display palette color description if enabled{% endcomment %}
+                        {% if block_settings.enable_custom_settings and product_option.name == block_settings.number_of_palette_colors_name %}
+                          {% assign description = '' %}
+                          {% if product_option_value.name == block_settings.palette_colors_24_value %}
+                            {% assign description = block_settings.palette_colors_24_description %}
+                          {% elsif product_option_value.name == block_settings.palette_colors_36_value %}
+                            {% assign description = block_settings.palette_colors_36_description %}
+                          {% elsif product_option_value.name == block_settings.palette_colors_48_value %}
+                            {% assign description = block_settings.palette_colors_48_description %}
+                          {% elsif product_option_value.name == block_settings.printed_palette_colors_value %}
+                            {% assign description = block_settings.printed_palette_colors_value_description %}
+                          {% endif %}
+                          {% if description != blank %}
+                            <span class="variant-option__button-label__description">{{ description | newline_to_br }}</span>
+                          {% endif %}
+                        {% endif %}
+                      </div>
+                    {% endif %}
+                  </div>
                 {% endif %}
                 {% render 'strikethrough-variant', product_option: product_option_value %}
               </label>
@@ -244,6 +291,7 @@
     padding: 0;
     margin-block-end: var(--margin-xs);
     width: 100%;
+    font-weight: bold;
   }
 
   .variant-option__swatch-value {
@@ -255,11 +303,10 @@
     --variant-picker-stroke-color: var(--color-variant-border);
 
     display: flex;
-    flex: 0 0 calc(3ch + 1.3em);
     align-items: center;
     position: relative;
-    padding-block: var(--padding-sm);
-    padding-inline: var(--padding-lg);
+    padding-block: var(--padding-md);
+    padding-inline: var(--padding-xl);
     border: var(--style-border-width) solid var(--color-variant-border);
     border-radius: var(--options-border-radius);
     border-width: var(--options-border-width);
@@ -267,7 +314,6 @@
     justify-content: center;
     min-height: calc(3ch + 1.3em);
     min-width: fit-content;
-    white-space: nowrap;
     background-color: var(--color-variant-background);
     color: var(--color-variant-text);
     transition: background-color var(--animation-speed) var(--animation-easing),
@@ -279,18 +325,28 @@
       color: var(--color-variant-hover-text);
     }
 
+    /* Mobile-specific padding for narrow screens */
+    @media screen and (max-width: 749px) {
+      padding-inline: var(--padding-2xl);
+    }
+
     @media screen and (min-width: 750px) {
-      padding: var(--padding-xs) var(--variant-option-padding-inline);
+      padding: var(--padding-sm) var(--variant-option-padding-inline);
     }
   }
 
   .variant-option__button-label__text {
     text-align: left;
-    text-wrap: auto;
+    transition: font-weight var(--animation-speed) var(--animation-easing);
+  }
+
+  /* Make variant text bold when selected */
+  .variant-option__button-label:has(:checked) .variant-option__button-label__text {
+    font-weight: bold;
   }
 
   .variant-option--equal-width-buttons {
-    --variant-min-width: clamp(44px, calc(var(--variant-option-padding-inline) * 2 + var(--variant-ch)), 100%);
+    --variant-min-width: clamp(150px, calc(var(--variant-option-padding-inline) * 2 + var(--variant-ch)), 100%);
 
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(var(--variant-min-width), 1fr));
@@ -507,5 +563,161 @@
   .variant-picker--right .variant-option {
     text-align: right;
     justify-content: right;
+  }
+
+
+
+  .variant-option__button-label__content {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: var(--gap-2xs);
+    width: 100%;
+  }
+
+  .variant-option__button-label__description {
+    font-size: 0.75em;
+    color: rgb(var(--color-foreground-rgb) / var(--opacity-80));
+    text-align: left;
+    line-height: 1.2;
+    font-weight: normal;
+    transition: color var(--animation-speed) var(--animation-easing);
+    white-space: normal;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    hyphens: none;
+    word-break: break-word;
+  }
+
+  /* Update description color on hover */
+  .variant-option__button-label:hover .variant-option__button-label__description {
+    color: rgb(var(--color-variant-hover-text-rgb) / var(--opacity-80));
+  }
+
+  /* Update description color when selected */
+  .variant-option__button-label:has(:checked) .variant-option__button-label__description {
+    color: rgb(var(--color-selected-variant-text-rgb) / var(--opacity-80));
+  }
+
+  /* Update description color when selected and hovered */
+  .variant-option__button-label:has(:checked):hover .variant-option__button-label__description {
+    color: rgb(var(--color-selected-variant-hover-text-rgb) / var(--opacity-80));
+  }
+
+  /* Adjust button label for content layout */
+  .variant-option__button-label:has(.variant-option__button-label__content) {
+    flex-direction: column;
+    padding-block: var(--padding-sm);
+    min-height: auto;
+  }
+
+  /* Canvas format options - two-column layout */
+  .variant-option__canvas-layout {
+    display: flex;
+    align-items: center;
+    gap: var(--padding-sm);
+    width: 100%;
+  }
+
+  /* Canvas format icon styling */
+  .variant-option__canvas-layout .variant-option__icon {
+    flex-shrink: 0;
+    margin-bottom: 0;
+    width: 48px;
+    height: 48px;
+    object-fit: contain;
+    image-rendering: -webkit-optimize-contrast;
+    image-rendering: crisp-edges;
+  }
+
+  /* Canvas content container */
+  .variant-option__canvas-content {
+    display: flex;
+    flex-direction: column;
+    gap: var(--gap-2xs);
+    flex: 1;
+  }
+
+  /* Canvas title styling */
+  .variant-option__canvas-title {
+    font-weight: normal;
+    font-size: 1em;
+    color: inherit;
+    text-align: left;
+    line-height: 1.2;
+    transition: font-weight var(--animation-speed) var(--animation-easing);
+  }
+
+  /* Make canvas title bold when selected */
+  .variant-option__button-label:has(:checked) .variant-option__canvas-title {
+    font-weight: bold;
+  }
+
+  /* Canvas features styling */
+  .variant-option__canvas-features {
+    font-size: 0.75em;
+    color: rgb(var(--color-foreground-rgb) / var(--opacity-80));
+    text-align: left;
+    line-height: 1.4;
+    font-weight: normal;
+    transition: color var(--animation-speed) var(--animation-easing);
+    white-space: normal;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    hyphens: none;
+    word-break: break-word;
+  }
+
+  /* Update canvas features color on hover */
+  .variant-option__button-label:hover .variant-option__canvas-features {
+    color: rgb(var(--color-variant-hover-text-rgb) / var(--opacity-80));
+  }
+
+  /* Update canvas features color when selected */
+  .variant-option__button-label:has(:checked) .variant-option__canvas-features {
+    color: rgb(var(--color-selected-variant-text-rgb) / var(--opacity-80));
+  }
+
+  /* Update canvas features color when selected and hovered */
+  .variant-option__button-label:has(:checked):hover .variant-option__canvas-features {
+    color: rgb(var(--color-selected-variant-hover-text-rgb) / var(--opacity-80));
+  }
+
+  /* Text content container for non-canvas options */
+  .variant-option__button-label__text-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--gap-2xs);
+    width: 100%;
+    text-align: center;
+  }
+
+  /* Ensure variant name is centered for non-canvas options */
+  .variant-option__button-label:not(:has(.variant-option__canvas-layout)) .variant-option__button-label__text {
+    text-align: center;
+    width: 100%;
+  }
+
+  /* Ensure descriptions are centered for non-canvas options */
+  .variant-option__button-label:not(:has(.variant-option__canvas-layout)) .variant-option__button-label__description {
+    text-align: center;
+    width: 100%;
+    white-space: normal;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    hyphens: none;
+    word-break: break-word;
+  }
+
+  /* Better text wrapping for medium mobile screens */
+  @media screen and (min-width: 400px) and (max-width: 500px) {
+    .variant-option__button-label__description {
+      font-size: 0.7em;
+      line-height: 1.3;
+      max-width: 100%;
+      hyphens: none;
+      word-break: break-word;
+    }
   }
 {% endstylesheet %}
