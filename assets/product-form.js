@@ -476,9 +476,16 @@ class ProductFormComponent extends Component {
    */
   async #checkAppBlockState() {
     try {
-      const { success, feature } = await window.UdoPaintsEditorManager.isReadyToExport();
-      // If the App Block is not ready to export and the feature is not gallery-kit, trigger the image uploader
-      if (!success && feature !== 'gallery-kit') await window.UdoPaintsEditorManager.uploadImage();
+      const { success, feature, error } = await window.UdoPaintsEditorManager.isReadyToExport();
+      if (!success && feature !== 'gallery-kit') {
+        // If there is an error, disable the add to cart button
+        if (error) this.refs.addToCartButtonContainer?.disable();
+        // If there is no error, trigger the image uploader
+        else await window.UdoPaintsEditorManager.uploadImage();
+      } else {
+        // Enable the add to cart button
+        this.refs.addToCartButtonContainer?.enable();
+      }
       return { success, feature };
     } catch (error) {
       console.error('Error checking App Block state:', error);
@@ -553,7 +560,7 @@ class ProductFormComponent extends Component {
     try {
       await window.UdoPaintsEditorManager.afterAddToCart({ itemKey, cartToken });
     } catch (error) {
-      console.error('Error when calling afterAddToCart:', error);
+      console.error('App Block error after adding to cart:', error);
     }
   }
 
