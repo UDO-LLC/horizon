@@ -3,8 +3,8 @@
   
   This component shows a progress indicator for Buy X Get Y promotions
   based on theme settings configuration. Only eligible products/collections
-  count towards the promotion progress. Free items can be targeted separately
-  from promotion-eligible items.
+  count towards the promotion progress. The component automatically resets
+  when discounts are applied, showing progress towards the next threshold.
 
   @param {number} current_quantity - Current quantity in cart (default: 0)
 {%- enddoc -%}
@@ -20,19 +20,25 @@
   assign eligible_collections = settings.buy_x_get_y_eligible_collections
   assign eligible_products = settings.buy_x_get_y_eligible_products
   
-  # Get free items collections and products from settings
-  assign free_items_collections = settings.buy_x_get_y_free_items_collections
-  assign free_items_products = settings.buy_x_get_y_free_items_products
-
-  # Calculate eligible quantity from cart items
+  # Calculate eligible quantity from cart items (excluding items with discounts)
   assign eligible_quantity = 0
   
-  # If no collections or products are specified, all items are eligible
+  # If no collections or products are specified, all non-discounted items are eligible
   if eligible_collections == blank and eligible_products == blank
-    assign eligible_quantity = current_quantity
-  else
-    # Check each cart item against eligible collections and products
+    # Count only items without discounts
     for item in cart.items
+      if item.discount_allocations == blank
+        assign eligible_quantity = eligible_quantity | plus: item.quantity
+      endif
+    endfor
+  else
+    # Check each cart item against eligible collections and products (excluding discounted items)
+    for item in cart.items
+      # Skip items that already have discounts
+      if item.discount_allocations != blank
+        continue
+      endif
+      
       assign is_eligible = false
       
       # Check if product is in eligible products list
@@ -75,86 +81,29 @@
 
   # Get free items count from theme configuration
   assign max_free_items_count = settings.buy_x_get_y_free_items_count | default: 1
-  
-  # Calculate actual free items that can be applied based on eligible items in cart
-  assign free_items_remaining = 0
-  if eligible_quantity >= required_quantity
-    # Calculate how many complete sets of required_quantity we have
-    assign complete_sets = eligible_quantity | divided_by: required_quantity
-    # Calculate total free items earned
-    assign total_free_items_earned = complete_sets | times: max_free_items_count
-    # Calculate how many free items are already in cart (eligible items that are free)
-    assign free_items_in_cart = 0
-    
-    # Check each cart item to see if it's a free item
-    for item in cart.items
-      assign is_free_item_eligible = false
-      
-      # Check if product is in free items products list
-      if free_items_products != blank
-        for free_product in free_items_products
-          if item.product.id == free_product.id
-            assign is_free_item_eligible = true
-            break
-          endif
-        endfor
-      endif
-      
-      # Check if product is in free items collections
-      if is_free_item_eligible == false and free_items_collections != blank
-        for free_collection in free_items_collections
-          for collection in item.product.collections
-            if collection.id == free_collection.id
-              assign is_free_item_eligible = true
-              break
-            endif
-          endfor
-          if is_free_item_eligible
-            break
-          endif
-        endfor
-      endif
-      
-      # If no free items targeting is set, all products can be free items
-      if free_items_products == blank and free_items_collections == blank
-        assign is_free_item_eligible = true
-      endif
-      
-      # If this is a free-item-eligible product and it's marked as free (has discount)
-      if is_free_item_eligible and item.final_line_price < item.original_line_price
-        assign free_items_in_cart = free_items_in_cart | plus: item.quantity
-      endif
-    endfor
-    
-    # Calculate remaining free items
-    assign free_items_remaining = total_free_items_earned | minus: free_items_in_cart
-    assign free_items_remaining = free_items_remaining | at_least: 0
-  endif
 
-  # Generate dynamic promotion title based on settings
+  # Generate promotion title
   if settings.buy_x_get_y_promotion_title != blank
-    assign promotion_title = settings.buy_x_get_y_promotion_title
+    assign promotion_title = settings.buy_x_get_y_promotion_title | replace: '{{ count }}', required_quantity | replace: '{{ free_items }}', max_free_items_count
   else
     assign promotion_title = 'Buy ' | append: required_quantity | append: ' Get ' | append: max_free_items_count | append: ' Free 🎁'
   endif
 
-  # Replace variables in promotion title
-  assign promotion_title = promotion_title | replace: '{{ count }}', required_quantity | replace: '{{ free_items }}', max_free_items_count
-
   # Get message settings from theme configuration
   if settings.buy_x_get_y_offer_unlocked_message != blank
-    assign offer_unlocked_message = settings.buy_x_get_y_offer_unlocked_message
+    assign offer_unlocked_message = settings.buy_x_get_y_offer_unlocked_message | replace: '{{ free_items }}', max_free_items_count
   else
-    assign offer_unlocked_message = 'content.buy_x_get_y_default_offer_unlocked' | t
+    assign offer_unlocked_message = 'content.buy_x_get_y_default_offer_unlocked' | t | replace: '{{ free_items }}', max_free_items_count
   endif
 
+  assign remaining_quantity = required_quantity | minus: eligible_quantity
   if settings.buy_x_get_y_add_more_message != blank
-    assign add_more_message = settings.buy_x_get_y_add_more_message
+    assign add_more_message = settings.buy_x_get_y_add_more_message | replace: '{{ count }}', remaining_quantity | replace: '{{ free_items }}', max_free_items_count
   else
-    assign add_more_message = 'content.buy_x_get_y_default_add_more' | t
+    assign add_more_message = 'content.buy_x_get_y_default_add_more' | t | replace: '{{ count }}', remaining_quantity | replace: '{{ free_items }}', max_free_items_count
   endif
 
-  # Calculate progress percentage using eligible quantity
+  # Calculate progress percentage using eligible quantity (items without discounts)
   assign progress_percentage = eligible_quantity | times: 100 | divided_by: required_quantity
   assign progress_percentage = progress_percentage | at_most: 100
 %}
@@ -177,7 +126,7 @@
     </span>
     <span class="cart-discount-buy-x-get-y__progress-text">
       {%- if eligible_quantity >= required_quantity -%}
-        {{ eligible_quantity }} {{ item_label }} + {{ free_items_remaining }} Free
+        {{ eligible_quantity }}/{{ required_quantity }} {{ item_label }} - Ready for Free Item!
       {%- else -%}
         {{ eligible_quantity }}/{{ required_quantity }} {{ item_label }}
       {%- endif -%}
@@ -193,10 +142,10 @@
       aria-valuenow="{{ eligible_quantity }}"
       style="background-color: {{ progress_bar_bg }};"
     >
-      <div
-        class="cart-discount-buy-x-get-y__progress-fill"
-        style="transform: translateX(-{{ 100 | minus: progress_percentage }}%); background-color: {{ progress_bar_fill }};"
-      ></div>
+        <div
+         class="cart-discount-buy-x-get-y__progress-fill"
+         style="transform: translateX(-{{ 100 | minus: progress_percentage }}%); background-color: {{ progress_bar_fill }};"
+       ></div>
     </div>
 
     <div class="cart-discount-buy-x-get-y__progress-icons">
@@ -266,19 +215,9 @@
 
   <div class="cart-discount-buy-x-get-y__message">
     {%- if eligible_quantity >= required_quantity -%}
-      {%- if free_items_remaining > 0 -%}
-        {%- assign message_with_free_items = offer_unlocked_message | replace: '{{ free_items_remaining }}', free_items_remaining -%}
-        <span>{{ message_with_free_items | escape }}</span>
-      {%- else -%}
-        <span>All free items have been applied! 🎉</span>
-      {%- endif -%}
+      <span>{{ offer_unlocked_message | escape }}</span>
     {%- else -%}
-      {%- assign remaining = required_quantity | minus: eligible_quantity -%}
-      {%- assign message_with_count = add_more_message
-        | replace: '{{ count }}', remaining
-        | replace: '{{ free_items }}', max_free_items_count
-      -%}
-      <span>{{ message_with_count | escape }}</span>
+      <span>{{ add_more_message | escape }}</span>
     {%- endif -%}
   </div>
 </div>
@@ -370,17 +309,6 @@
     box-shadow: 0 0 0 1px var(--buy-x-get-y-icon-active-bg, var(--color-primary));
   }
 
-  .cart-discount-buy-x-get-y__progress-icon--transition {
-    background: linear-gradient(
-      to right,
-      var(--buy-x-get-y-icon-active-bg, var(--color-primary)) 50%,
-      var(--buy-x-get-y-icon-bg, var(--color-border)) 50%
-    );
-    color: var(--color-primary-button-text);
-    border-color: var(--buy-x-get-y-icon-active-bg, var(--color-primary));
-    box-shadow: 0 0 0 1px var(--buy-x-get-y-icon-active-bg, var(--color-primary));
-  }
-
   .cart-discount-buy-x-get-y__message {
     text-align: center;
     padding: var(--padding-xs);
@@ -390,44 +318,6 @@
     font-size: var(--font-size--xs);
     font-weight: 500;
     color: var(--color-foreground);
-  }
-
-  /* High contrast mode support */
-  @media (prefers-contrast: more) {
-    .cart-discount-buy-x-get-y {
-      border: var(--style-border-width) solid #000000;
-      background: #ffffff;
-    }
-
-    .cart-discount-buy-x-get-y__title {
-      color: #000000;
-      font-weight: 700;
-    }
-
-    .cart-discount-buy-x-get-y__progress-bar {
-      background-color: #000000;
-      border: var(--style-border-width) solid #000000;
-    }
-
-    .cart-discount-buy-x-get-y__progress-fill {
-      background-color: #000000;
-    }
-
-    .cart-discount-buy-x-get-y__progress-icon {
-      background-color: #ffffff;
-      border: var(--style-border-width) solid #000000;
-      color: #000000;
-    }
-
-    .cart-discount-buy-x-get-y__progress-icon--active {
-      background-color: #000000;
-      color: #ffffff;
-    }
-
-    .cart-discount-buy-x-get-y__progress-icon--transition {
-      background: linear-gradient(to right, #000000 50%, #ffffff 50%);
-      color: #ffffff;
-    }
   }
 
   /* Responsive adjustments */

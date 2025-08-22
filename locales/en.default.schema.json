@@ -173,8 +173,7 @@
     "buy_x_get_y_free_items_count": "Number of free items customers will receive when the promotion is unlocked.",
     "buy_x_get_y_eligible_collections_info": "Select collections whose products are eligible for this promotion. Leave empty to include all products.",
     "buy_x_get_y_eligible_products_info": "Select specific products that are eligible for this promotion. Leave empty to include all products.",
-    "buy_x_get_y_free_items_collections_info": "Select collections whose products can be given as free items. Leave empty to allow any product as free item.",
-    "buy_x_get_y_free_items_products_info": "Select specific products that can be given as free items. Leave empty to allow any product as free item."
+
 
   },
   "names": {
@@ -679,8 +678,6 @@
     "buy_x_get_y_free_items_count": "Free items count",
     "buy_x_get_y_eligible_collections": "Eligible Collections",
     "buy_x_get_y_eligible_products": "Eligible Products",
-    "buy_x_get_y_free_items_collections": "Free Items Collections",
-    "buy_x_get_y_free_items_products": "Free Items Products",
     "case": "Case",
     "checkout_buttons": "Accelerated checkout buttons",
     "collection": "Collection",

@@ -1854,18 +1854,6 @@
         "info": "t:info.buy_x_get_y_free_items_count"
       },
       {
-        "type": "collection_list",
-        "id": "buy_x_get_y_free_items_collections",
-        "label": "t:settings.buy_x_get_y_free_items_collections",
-        "info": "t:info.buy_x_get_y_free_items_collections_info"
-      },
-      {
-        "type": "product_list",
-        "id": "buy_x_get_y_free_items_products",
-        "label": "t:settings.buy_x_get_y_free_items_products",
-        "info": "t:info.buy_x_get_y_free_items_products_info"
-      },
-      {
         "type": "text",
         "id": "buy_x_get_y_promotion_title",
         "label": "t:settings.buy_x_get_y_promotion_title",
@@ -1883,7 +1871,7 @@
         "type": "text",
         "id": "buy_x_get_y_offer_unlocked_message",
         "label": "t:settings.buy_x_get_y_offer_unlocked_message",
-        "default": "Offer unlocked! Add {{ free_items_remaining }} for free! 🎉",
+        "default": "Offer unlocked! Add {{ free_items }} for free! 🎉",
         "info": "t:info.buy_x_get_y_offer_unlocked_message"
       },
       {
