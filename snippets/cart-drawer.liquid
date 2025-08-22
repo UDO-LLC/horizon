@@ -40,17 +40,25 @@
         data-section-id="{{ section.id }}"
       >
         {%- if cart.empty? -%}
-          <div class="cart-drawer__header">
-            <button
-              ref="closeButton"
-              on:click="cart-drawer-component/close"
-              class="button close-button cart-drawer__close-button button-unstyled"
-              aria-label="{{ 'actions.close_dialog' | t }}"
-            >
-              <span class="svg-wrapper">
-                {{- 'icon-close.svg' | inline_asset_content -}}
-              </span>
-            </button>
+          <div class="cart-drawer__header-main">
+            <div class="cart-drawer__header">
+              <span class="cart-drawer__heading h3">{{ 'content.cart_title' | t }}</span>
+              <button
+                ref="closeButton"
+                on:click="cart-drawer-component/close"
+                class="button close-button cart-drawer__close-button button-unstyled"
+                aria-label="{{ 'actions.close_dialog' | t }}"
+              >
+                <span class="svg-wrapper">
+                  {{- 'icon-close.svg' | inline_asset_content -}}
+                </span>
+              </button>
+            </div>
+            {%- if settings.show_buy_x_get_y_discount -%}
+              {%- liquid
+                render 'cart-discount-buy-x-get-y', current_quantity: cart.item_count
+              -%}
+            {%- endif -%}
           </div>
 
           <div
@@ -143,6 +151,7 @@
     border-bottom: var(--style-border-width) solid none;
     position: sticky;
     padding: var(--padding-xs) var(--padding-xs) 0;
+    min-height: var(--minimum-touch-target);
 
     @media screen and (min-width: 750px) {
       padding: var(--padding-md) var(--padding-md) 0;
