@@ -68,7 +68,8 @@ export class AddToCartComponent extends Component {
    * @param {MouseEvent & {target: HTMLElement}} event - The click event.
    */
   handleClick(event) {
-    if (!this.#checkFormValidity()) return;
+    const form = this.closest('form');
+    if (!form?.checkValidity()) return;
     this.listenToAppBlockState();
   }
 
@@ -95,7 +96,8 @@ export class AddToCartComponent extends Component {
    */
   handleSuccessfulAddToCart() {
     this.animateAddToCart();
-    if (!this.closest('.quick-add-modal')) this.#animateFlyToCart();
+    const animationEnabled = this.dataset.addToCartAnimation === 'true';
+    if (animationEnabled && !this.closest('.quick-add-modal')) this.#animateFlyToCart();
     this.enable();
     this.hideSpinner();
   }
@@ -146,42 +148,6 @@ export class AddToCartComponent extends Component {
         this.refs.addToCartButton.classList.remove('atc-added');
       }, 10);
     }, ADD_TO_CART_TEXT_ANIMATION_DURATION);
-  }
-
-  /**
-   * Checks if the form is valid when the user adds an item to cart.
-   * Currently only checks the gift card recipient form.
-   * @returns {boolean} - True if the form is valid, false otherwise.
-   */
-  #checkFormValidity() {
-    const form = this.closest('form');
-    if (!form) return true;
-
-    const allInputs = Array.from(form.querySelectorAll('input, select, textarea')).filter((input) =>
-      input.id.includes('Recipient')
-    );
-    let allInputsValid = true;
-    for (const input of allInputs) {
-      if (
-        !(
-          input instanceof HTMLInputElement ||
-          input instanceof HTMLSelectElement ||
-          input instanceof HTMLTextAreaElement
-        )
-      ) {
-        continue;
-      }
-
-      // Skip disabled inputs
-      if (input.disabled) continue;
-
-      // Check validity on all input elements
-      if (!input.checkValidity()) {
-        allInputsValid = false;
-        break;
-      }
-    }
-    return allInputsValid;
   }
 }
 
@@ -503,8 +469,7 @@ class ProductFormComponent extends Component {
   async #getCartData() {
     try {
       const response = await fetch(`${Theme.routes.cart_url}.json`);
-      const responseData = await response.json();
-      return responseData;
+      return await response.json();
     } catch (error) {
       console.error('Error getting cart data:', error);
       return null;

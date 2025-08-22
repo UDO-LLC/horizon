@@ -1,10 +1,10 @@
 # UdoPaints Theme - Horizon
 
-A custom Shopify theme forked from Shopify's Horizon theme (v2.1.1), enhanced with specialized features for UdoPaints.
+A custom Shopify theme forked from Shopify's Horizon theme, enhanced with specialized features for UdoPaints.
 
 ## 📋 Overview
 
-This repository contains a **forked and customized version** of Shopify's Horizon theme (version 2.1.1), specifically tailored for UdoPaints. The theme has been enhanced with custom integrations and specialized product features.
+This repository contains a **forked and customized version** of Shopify's Horizon theme, specifically tailored for UdoPaints. The theme has been enhanced with custom integrations and specialized product features.
 
 ### 🎯 Key Enhancements
 
@@ -24,7 +24,7 @@ udopaints-theme-horizon/
 │   └── *.svg                 # Icons and graphics
 ├── blocks/                   # Reusable content blocks
 ├── config/                   # Theme configuration
-│   ├── settings_schema.json  # Theme settings (v2.1.1)
+│   ├── settings_schema.json  # Theme settings
 │   └── settings_data.json    # Default settings
 ├── layout/                   # Theme layout templates
 ├── locales/                  # Internationalization files
@@ -37,7 +37,7 @@ udopaints-theme-horizon/
 
 ## 🚀 Features
 
-### Core Horizon Features (v2.1.1)
+### Core Theme Features
 - **Responsive Design**: Mobile-first approach with adaptive layouts
 - **Modern UI/UX**: Clean, contemporary design with smooth animations
 - **Performance Optimized**: Fast loading with critical CSS and lazy loading
@@ -266,16 +266,7 @@ For technical support or questions about this theme:
 
 ## 📄 License
 
-This theme is forked from Shopify's Horizon theme (v2.1.1) and is customized for UdoPaints. The original Horizon theme is licensed under Shopify's terms of service. Please refer to Shopify's terms of service for theme usage and the LICENSE.md file for complete licensing information.
-
-## 🔄 Migration Notes
-
-This theme was migrated from Horizon version 2.1.0 to 2.1.1 with the following changes:
-- Updated to Horizon 2.1.1 base
-- Enhanced product templates for specialized products
-- Added custom JavaScript modules for enhanced functionality
-- Improved touch device support
-- Enhanced gift card recipient forms
+This theme is forked from Shopify's Horizon theme and is customized for UdoPaints. The original Horizon theme is licensed under Shopify's terms of service. Please refer to Shopify's terms of service for theme usage and the LICENSE.md file for complete licensing information.
 
 ## 📋 Changelog
 
