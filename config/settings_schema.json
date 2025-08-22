@@ -1911,6 +1911,24 @@
       },
       {
         "type": "header",
+        "content": "t:content.cart_summary"
+      },
+      {
+        "type": "textarea",
+        "id": "guarantee_description",
+        "label": "t:settings.guarantee_description",
+        "info": "t:info.guarantee_description",
+        "default": "30-Day Money Back Guarantee"
+      },
+      {
+        "type": "checkbox",
+        "id": "show_payment_icons",
+        "label": "t:settings.show_payment_icons",
+        "default": true,
+        "info": "t:info.show_payment_icons"
+      },
+      {
+        "type": "header",
         "content": "t:content.product_media"
       },
       {

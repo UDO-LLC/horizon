@@ -126,6 +126,7 @@
     "typography_primary": "Primary typography",
     "typography_secondary": "Secondary typography",
     "typography_tertiary": "Tertiary typography",
+    "cart_summary": "Cart Summary",
     "special_discount_display": "Special Discount Display",
     "variant_settings": "Variant settings",
     "visibility": "Visibility",
@@ -173,8 +174,8 @@
     "buy_x_get_y_free_items_count": "Number of free items customers will receive when the promotion is unlocked.",
     "buy_x_get_y_eligible_collections_info": "Select collections whose products are eligible for this promotion. Leave empty to include all products.",
     "buy_x_get_y_eligible_products_info": "Select specific products that are eligible for this promotion. Leave empty to include all products.",
-
-
+    "guarantee_description": "Display a guarantee message to build customer confidence. This will appear in the cart summary.",
+    "show_payment_icons": "Display accepted payment method icons in the cart summary to reassure customers about payment options."
   },
   "names": {
     "product_title": "Product title",
@@ -678,6 +679,8 @@
     "buy_x_get_y_free_items_count": "Free items count",
     "buy_x_get_y_eligible_collections": "Eligible Collections",
     "buy_x_get_y_eligible_products": "Eligible Products",
+    "guarantee_description": "Guarantee description",
+    "show_payment_icons": "Show payment icons",
     "case": "Case",
     "checkout_buttons": "Accelerated checkout buttons",
     "collection": "Collection",
