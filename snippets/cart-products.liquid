@@ -9,9 +9,14 @@
 <div
   {{ block.shopify_attributes }}
   class="cart-items__wrapper"
-  {% if settings.product_title_case == 'uppercase' %}
-    style="--product-title-case: uppercase;"
-  {% endif %}
+  style="
+    {% if settings.product_title_case == 'uppercase' %}
+      --product-title-case: uppercase;
+    {% endif %}
+    {% if settings.show_buy_x_get_y_discount %}
+      --buy-x-get-y-icon-active-bg: {{ settings.buy_x_get_y_icon_active_background | default: '#000000'}};
+    {% endif %}
+    "
 >
   {% if cart.empty? %}
     {%- if shop.customer_accounts_enabled and customer == null -%}
@@ -199,30 +204,36 @@
               <!-- Discount allocation display -->
               {%- if item.discount_allocations.size > 0 -%}
                 <div class="cart-items__discount-allocation">
-                  {%- for discount_allocation in item.discount_allocations -%}
-                    <div class="cart-items__discount-item">
-                      <svg 
-                        xmlns="http://www.w3.org/2000/svg" 
-                        viewBox="0 0 24 24" 
-                        fill="currentColor" 
-                        aria-hidden="true"
-                        class="cart-items__discount-icon"
-                      >
-                        <path 
-                          fill-rule="evenodd"
-                          d="M1.5 6.375c0-1.036.84-1.875 1.875-1.875h17.25c1.035 0 1.875.84 1.875 1.875v3.026a.75.75 0 0 1-.375.65 2.249 2.249 0 0 0 0 3.898.75.75 0 0 1 .375.65v3.026c0 1.035-.84 1.875-1.875 1.875H3.375A1.875 1.875 0 0 1 1.5 17.625v-3.026a.75.75 0 0 1 .374-.65 2.249 2.249 0 0 0 0-3.898.75.75 0 0 1-.374-.65V6.375Zm15-1.125a.75.75 0 0 1 .75.75v.75a.75.75 0 0 1-1.5 0V6a.75.75 0 0 1 .75-.75Zm.75 4.5a.75.75 0 0 0-1.5 0v.75a.75.75 0 0 0 1.5 0v-.75Zm-.75 3a.75.75 0 0 1 .75.75v.75a.75.75 0 0 1-1.5 0v-.75a.75.75 0 0 1 .75-.75Zm.75 4.5a.75.75 0 0 0-1.5 0V18a.75.75 0 0 0 1.5 0v-.75ZM6 12a.75.75 0 0 1 .75-.75H12a.75.75 0 0 1 0 1.5H6.75A.75.75 0 0 1 6 12Zm.75 2.25a.75.75 0 0 0 0 1.5h3a.75.75 0 0 0 0-1.5h-3Z"
-                          clip-rule="evenodd"
-                        ></path>
-                      </svg>
+                  {% if settings.show_buy_x_get_y_discount %}
+                    {%- for discount_allocation in item.discount_allocations -%}
+                      <div class="cart-items__discount-item">
+                        <svg 
+                          xmlns="http://www.w3.org/2000/svg" 
+                          viewBox="0 0 24 24" 
+                          fill="currentColor" 
+                          aria-hidden="true"
+                          class="cart-items__discount-icon"
+                        >
+                          <path 
+                            fill-rule="evenodd"
+                            d="M1.5 6.375c0-1.036.84-1.875 1.875-1.875h17.25c1.035 0 1.875.84 1.875 1.875v3.026a.75.75 0 0 1-.375.65 2.249 2.249 0 0 0 0 3.898.75.75 0 0 1 .375.65v3.026c0 1.035-.84 1.875-1.875 1.875H3.375A1.875 1.875 0 0 1 1.5 17.625v-3.026a.75.75 0 0 1 .374-.65 2.249 2.249 0 0 0 0-3.898.75.75 0 0 1-.374-.65V6.375Zm15-1.125a.75.75 0 0 1 .75.75v.75a.75.75 0 0 1-1.5 0V6a.75.75 0 0 1 .75-.75Zm.75 4.5a.75.75 0 0 0-1.5 0v.75a.75.75 0 0 0 1.5 0v-.75Zm-.75 3a.75.75 0 0 1 .75.75v.75a.75.75 0 0 1-1.5 0v-.75a.75.75 0 0 1 .75-.75Zm.75 4.5a.75.75 0 0 0-1.5 0V18a.75.75 0 0 0 1.5 0v-.75ZM6 12a.75.75 0 0 1 .75-.75H12a.75.75 0 0 1 0 1.5H6.75A.75.75 0 0 1 6 12Zm.75 2.25a.75.75 0 0 0 0 1.5h3a.75.75 0 0 0 0-1.5h-3Z"
+                            clip-rule="evenodd"
+                          ></path>
+                        </svg>
+                        <span class="cart-items__discount-title">{{ discount_allocation.discount_application.title }}</span>
+                        {%- comment -%} Only show amount for discount line items (when final price is 0 or less than original) {%- endcomment -%}
+                        {%- if item.final_line_price == 0 or item.final_line_price < item.original_line_price -%}
+                          <span class="cart-items__discount-amount">
+                            (-{{ discount_allocation.amount | money }})
+                          </span>
+                        {%- endif -%}
+                      </div>
+                    {%- endfor -%}
+                  {% else %}
+                    {%- for discount_allocation in item.discount_allocations -%}
                       <span class="cart-items__discount-title">{{ discount_allocation.discount_application.title }}</span>
-                      {%- comment -%} Only show amount for discount line items (when final price is 0 or less than original) {%- endcomment -%}
-                      {%- if item.final_line_price == 0 or item.final_line_price < item.original_line_price -%}
-                        <span class="cart-items__discount-amount">
-                          (-{{ discount_allocation.amount | money }})
-                        </span>
-                      {%- endif -%}
-                    </div>
-                  {%- endfor -%}
+                    {%- endfor -%}
+                  {% endif %}
                 </div>
               {%- endif -%}
 
@@ -663,14 +674,6 @@
     }
   }
 
-  .cart-items__discount-buy-x-get-y {
-    font-size: var(--font-size--xs);
-    padding: var(--padding-2xs) var(--padding-xs);
-    border-radius: 10px;
-    background-color: var(--buy-x-get-y-icon-active-bg, var(--color-primary));
-    color: var(--color-primary-button-text);
-  }
-
   /* Discount allocation styles */
   .cart-items__discount-item {
     display: inline-flex;
@@ -681,8 +684,7 @@
     padding: var(--padding-3xs) var(--padding-2xs);
     text-align: center;
     font-size: var(--font-size--xs);
-    /* font-weight: 500; */
-    background-color: var(--color-primary);
+    background-color: var(--buy-x-get-y-icon-active-bg, var(--color-primary));
     color: var(--color-primary-button-text);
   }
 
