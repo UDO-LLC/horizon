@@ -60,6 +60,14 @@
     "show_add_discount_code": false,
     "show_installments": false,
     "show_accelerated_checkout_buttons": false,
+    "buy_x_get_y_eligible_collections": [
+      "custom-kits",
+      "floral",
+      "custom-paint-by-numbers-kits",
+      "frontpage"
+    ],
+    "buy_x_get_y_progress_bar_fill": "#000000",
+    "buy_x_get_y_icon_active_background": "#000000",
     "drawer_drop_shadow": true,
     "icon_stroke": "default",
     "input_border_width": 1,
