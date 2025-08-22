@@ -125,11 +125,7 @@
       {{ promotion_title | escape }}
     </span>
     <span class="cart-discount-buy-x-get-y__progress-text">
-      {%- if eligible_quantity >= required_quantity -%}
-        {{ eligible_quantity }}/{{ required_quantity }} {{ item_label }} - Ready for Free Item!
-      {%- else -%}
-        {{ eligible_quantity }}/{{ required_quantity }} {{ item_label }}
-      {%- endif -%}
+      {{ eligible_quantity }}/{{ required_quantity }} {{ item_label }}
     </span>
   </div>
 
@@ -215,7 +211,7 @@
 
   <div class="cart-discount-buy-x-get-y__message">
     {%- if eligible_quantity >= required_quantity -%}
-      <span>{{ offer_unlocked_message | escape }}</span>
+      <span class="cart-discount-buy-x-get-y__message--unlocked">{{ offer_unlocked_message | escape }}</span>
     {%- else -%}
       <span>{{ add_more_message | escape }}</span>
     {%- endif -%}
@@ -317,7 +313,14 @@
   .cart-discount-buy-x-get-y__message span {
     font-size: var(--font-size--xs);
     font-weight: 500;
-    color: var(--color-foreground);
+    padding: var(--padding-2xs) var(--padding-xs);
+    border-radius: 10px;
+  }
+
+  .cart-discount-buy-x-get-y__message--unlocked {
+    background-color: var(--buy-x-get-y-icon-active-bg, var(--color-primary));
+    color: var(--color-primary-button-text);
+    font-weight: 600;
   }
 
   /* Responsive adjustments */

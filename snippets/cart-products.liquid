@@ -230,7 +230,15 @@
                       role="list"
                     >
                       {%- for discount in item.line_level_discount_allocations -%}
-                        <li>{{ discount.discount_application.title | escape }}</li>
+                        <li>
+                          {% if settings.show_buy_x_get_y_discount %}
+                            <span class="cart-items__discount-buy-x-get-y">
+                              {{ discount.discount_application.title | escape }}
+                            </span>
+                          {% else %}
+                            {{ discount.discount_application.title | escape }}
+                          {% endif %}
+                        </li>
                       {%- endfor -%}
                     </ul>
                   {% endif %}
@@ -395,7 +403,7 @@
     animation: removeRow calc(var(--animation-speed) * 2) var(--animation-easing) forwards;
     animation-delay: var(--animation-speed);
   }
-
+  
   @keyframes removeRow {
     0% {
       height: var(--row-height);
@@ -766,5 +774,13 @@
   .cart-items__properties dt,
   .cart-items__properties dd {
     display: inline;
+  }
+
+  .cart-items__discount-buy-x-get-y {
+    font-size: var(--font-size--xs);
+    padding: var(--padding-2xs) var(--padding-xs);
+    border-radius: 10px;
+    background-color: var(--buy-x-get-y-icon-active-bg, var(--color-primary));
+    color: var(--color-primary-button-text);
   }
 {% endstylesheet %}
