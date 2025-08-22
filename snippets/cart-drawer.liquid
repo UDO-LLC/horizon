@@ -141,10 +141,24 @@
     position: sticky;
     top: 0;
     z-index: 1;
+    min-height: 60px; /* Ensure consistent height for centering */
 
     @media screen and (min-width: 750px) {
       padding: var(--cart-drawer-padding-desktop);
     }
+  }
+
+  .cart-drawer .cart-drawer__close-button {
+    position: absolute;
+    margin: 0;
+    padding: 0;
+    right: 0;
+    top: 50%;
+    transform: translateY(-50%);
+  }
+
+  .cart-drawer__close-button:hover {
+    background-color: var(--color-background-elevated);
   }
 
   .cart-drawer__dialog {
