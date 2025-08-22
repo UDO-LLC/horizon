@@ -1812,6 +1812,117 @@
       },
       {
         "type": "header",
+        "content": "t:content.special_discount_display"
+      },
+      {
+        "type": "checkbox",
+        "id": "show_buy_x_get_y_discount",
+        "label": "t:settings.show_buy_x_get_y_discount",
+        "info": "t:info.buy_x_get_y_discount",
+        "default": true
+      },
+      {
+        "type": "range",
+        "id": "buy_x_get_y_required_quantity",
+        "label": "t:settings.buy_x_get_y_required_quantity",
+        "min": 1,
+        "max": 10,
+        "step": 1,
+        "default": 2,
+        "info": "t:info.buy_x_get_y_required_quantity"
+      },
+      {
+        "type": "collection_list",
+        "id": "buy_x_get_y_eligible_collections",
+        "label": "t:settings.buy_x_get_y_eligible_collections",
+        "info": "t:info.buy_x_get_y_eligible_collections_info"
+      },
+      {
+        "type": "product_list",
+        "id": "buy_x_get_y_eligible_products",
+        "label": "t:settings.buy_x_get_y_eligible_products",
+        "info": "t:info.buy_x_get_y_eligible_products_info"
+      },
+      {
+        "type": "range",
+        "id": "buy_x_get_y_free_items_count",
+        "label": "t:settings.buy_x_get_y_free_items_count",
+        "min": 1,
+        "max": 10,
+        "step": 1,
+        "default": 1,
+        "info": "t:info.buy_x_get_y_free_items_count"
+      },
+      {
+        "type": "collection_list",
+        "id": "buy_x_get_y_free_items_collections",
+        "label": "t:settings.buy_x_get_y_free_items_collections",
+        "info": "t:info.buy_x_get_y_free_items_collections_info"
+      },
+      {
+        "type": "product_list",
+        "id": "buy_x_get_y_free_items_products",
+        "label": "t:settings.buy_x_get_y_free_items_products",
+        "info": "t:info.buy_x_get_y_free_items_products_info"
+      },
+      {
+        "type": "text",
+        "id": "buy_x_get_y_promotion_title",
+        "label": "t:settings.buy_x_get_y_promotion_title",
+        "default": "Buy {{ count }} Get {{ free_items }} Free 🎁",
+        "info": "t:info.buy_x_get_y_promotion_title"
+      },
+      {
+        "type": "text",
+        "id": "buy_x_get_y_item_label",
+        "label": "t:settings.buy_x_get_y_item_label",
+        "default": "Kits",
+        "info": "t:info.buy_x_get_y_item_label"
+      },
+      {
+        "type": "text",
+        "id": "buy_x_get_y_offer_unlocked_message",
+        "label": "t:settings.buy_x_get_y_offer_unlocked_message",
+        "default": "Offer unlocked! Add {{ free_items_remaining }} for free! 🎉",
+        "info": "t:info.buy_x_get_y_offer_unlocked_message"
+      },
+      {
+        "type": "text",
+        "id": "buy_x_get_y_add_more_message",
+        "label": "t:settings.buy_x_get_y_add_more_message",
+        "default": "Add {{ count }} more to unlock your {{ free_items }} free!",
+        "info": "t:info.buy_x_get_y_add_more_message"
+      },
+      {
+        "type": "color",
+        "id": "buy_x_get_y_progress_bar_background",
+        "label": "t:settings.buy_x_get_y_progress_bar_background",
+        "default": "#E6E6E6",
+        "info": "t:info.buy_x_get_y_progress_bar_background"
+      },
+      {
+        "type": "color",
+        "id": "buy_x_get_y_progress_bar_fill",
+        "label": "t:settings.buy_x_get_y_progress_bar_fill",
+        "default": "#000000",
+        "info": "t:info.buy_x_get_y_progress_bar_fill"
+      },
+      {
+        "type": "color",
+        "id": "buy_x_get_y_icon_background",
+        "label": "t:settings.buy_x_get_y_icon_background",
+        "default": "#E6E6E6",
+        "info": "t:info.buy_x_get_y_icon_background"
+      },
+      {
+        "type": "color",
+        "id": "buy_x_get_y_icon_active_background",
+        "label": "t:settings.buy_x_get_y_icon_active_background",
+        "default": "#000000",
+        "info": "t:info.buy_x_get_y_icon_active_background"
+      },
+      {
+        "type": "header",
         "content": "t:content.product_media"
       },
       {
