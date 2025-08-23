@@ -1,0 +1,279 @@
+{%- doc -%}
+  Renders cart upsell products in a mobile-friendly layout.
+  Displays recommended products that customers can add to their cart.
+  
+  This snippet automatically handles:
+  - Fetching products from either a selected collection or specific product list
+  - Using theme settings for all display options
+  - Only rendering when cart upsell is enabled in settings
+
+  @example
+    {% render 'cart-upsell' %}
+{%- enddoc -%}
+
+{% liquid
+  # Get products based on selected source
+  assign upsell_products = blank
+  
+  if settings.cart_upsell_source == 'collection' and settings.cart_upsell_collection != blank
+    assign upsell_products = settings.cart_upsell_collection.products
+  elsif settings.cart_upsell_source == 'products' and settings.cart_upsell_products != blank
+    assign upsell_products = settings.cart_upsell_products
+  endif
+
+  # Get settings with fallbacks
+  assign heading = settings.cart_upsell_heading | default: 'Frequently Bought Together'
+  assign show_description = settings.cart_upsell_show_description | default: true
+  assign show_compare_price = settings.cart_upsell_show_compare_price | default: true
+  assign add_button_text = settings.cart_upsell_button_text | default: 'Add'
+%}
+
+{% if settings.show_cart_upsell and upsell_products != blank %}
+  <script src="{{ 'cart-upsell.js' | asset_url }}" type="module" fetchpriority="low"></script>
+
+  <cart-upsell-component class="cart-upsell">
+    <h2 class="cart-upsell__heading">{{ heading }}</h2>
+
+    <div class="cart-upsell__products">
+      {% for product in upsell_products %}
+        <div class="cart-upsell__item" ref="upsellItems">
+          <button
+            class="cart-upsell__dismiss"
+            type="button"
+            aria-label="{{ 'actions.close' | t }}"
+            data-upsell-dismiss="{{ product.id }}"
+            ref="dismissButtons"
+            on:click="/handleDismiss"
+          >
+            ✕
+          </button>
+          
+          <a class="cart-upsell__image-link" href="{{ product.url }}">
+            <img
+              src="{{ product.featured_image | image_url: width: 60, height: 60 }}"
+              alt="{{ product.title | escape }}"
+              width="60"
+              height="60"
+              loading="lazy"
+              class="cart-upsell__image"
+            >
+          </a>
+          
+          <div class="cart-upsell__content">
+            <a href="{{ product.url }}" class="cart-upsell__title-link">
+              <h3 class="cart-upsell__title">{{ product.title | escape }}</h3>
+            </a>
+
+            {% if show_description and product.description != blank %}
+              <p class="cart-upsell__description">
+                {{ product.description | strip_html | truncate: 80 }}
+              </p>
+            {% endif %}
+
+            <div class="cart-upsell__footer">
+              <div class="cart-upsell__pricing">
+                <p class="cart-upsell__price">{{ product.price | money }}</p>
+                {% if show_compare_price and product.compare_at_price > product.price %}
+                  <p class="cart-upsell__compare-price">{{ product.compare_at_price | money }}</p>
+                {% endif %}
+              </div>
+
+              <button
+                class="cart-upsell__add-button"
+                type="button"
+                aria-label="{{ 'actions.add_to_cart' | t }}"
+                data-product-id="{{ product.id }}"
+                data-variant-id="{{ product.selected_or_first_available_variant.id }}"
+                ref="addButtons"
+                on:click="/handleAddToCart"
+              >
+                <span>{{ add_button_text }}</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  </cart-upsell-component>
+
+  <style>
+    .cart-upsell {
+      margin-top: auto;
+    }
+
+    .cart-upsell__heading {
+      margin: 0 0 0.5rem 0;
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: var(--color-foreground);
+    }
+
+    .cart-upsell__products {
+      display: flex;
+      flex-direction: column;
+      gap: var(--gap-2xs);
+    }
+
+    .cart-upsell__item {
+      position: relative;
+      display: flex;
+      align-items: stretch;
+      gap: 0.5rem;
+      padding: 0.5rem;
+      background-color: #e5e5e5;
+      border-radius: 0.5rem;
+    }
+
+    .cart-upsell__dismiss {
+      position: absolute;
+      top: var(--padding-2xs);
+      right: var(--padding-2xs);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: var(--icon-size-sm);
+      height: var(--icon-size-sm);
+      background-color: var(--color-background);
+      color: var(--color-foreground);
+      border: none;
+      border-radius: 50%;
+      font-size: 0.75rem;
+      cursor: pointer;
+      transition: background-color 0.2s ease;
+    }
+
+    .cart-upsell__dismiss:hover {
+      background-color: var(--color-secondary-button-background);
+      font-weight: var(--font-h3-weight);
+    }
+
+    .cart-upsell__dismiss:focus-visible {
+      outline: 2px solid #000000;
+      outline-offset: 2px;
+    }
+
+    .cart-upsell__image-link {
+      flex-shrink: 0;
+    }
+
+    .cart-upsell__image {
+      width: 60px;
+      height: 60px;
+      border-radius: 0.375rem;
+      object-fit: cover;
+    }
+
+    .cart-upsell__content {
+      flex-grow: 1;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .cart-upsell__title-link {
+      text-decoration: none;
+      color: inherit;
+    }
+
+    .cart-upsell__title {
+      margin: 0;
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: var(--color-foreground);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .cart-upsell__description {
+      margin: 0;
+      font-size: 0.75rem;
+      color: #374151;
+      line-height: 1.4;
+    }
+
+    .cart-upsell__footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: auto;
+    }
+
+    .cart-upsell__pricing {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .cart-upsell__price {
+      margin: 0;
+      font-size: 1rem;
+      font-weight: 600;
+      color: #374151;
+    }
+
+    .cart-upsell__compare-price {
+      margin: 0;
+      font-size: 0.875rem;
+      color: #6b7280;
+      text-decoration: line-through;
+    }
+
+    .cart-upsell__add-button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0.5rem 0.75rem;
+      height: 2.25rem;
+      width: 5rem;
+      background-color: var(--color-primary);
+      color: var(--color-primary-button-text);
+      border: none;
+      border-radius: 0.375rem;
+      font-size: 0.75rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background-color 0.2s ease;
+      white-space: nowrap;
+    }
+
+    .cart-upsell__add-button:hover {
+      background-color: var(--color-primary-hover);
+      color: var(--color-primary-button-hover-text);
+    }
+
+    .cart-upsell__add-button:focus-visible {
+      outline: 2px solid #000000;
+      outline-offset: 2px;
+    }
+
+    .cart-upsell__add-button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .cart-upsell__add-button.is-loading {
+      position: relative;
+      color: transparent;
+    }
+
+    .cart-upsell__add-button.is-loading::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 16px;
+      height: 16px;
+      margin: -8px 0 0 -8px;
+      border: 2px solid transparent;
+      border-top: 2px solid currentColor;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+  </style>
+{% endif %}

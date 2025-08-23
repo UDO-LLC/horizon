@@ -79,9 +79,13 @@
         {% endform %}
       </span>
     {% endif %}
+
+    {% comment %} Aug 24, 2025 - Hide tax info
     <div class="cart__summary-item tax-note cart-primary-typography">
       {% render 'tax-info', has_discounts_enabled: settings.show_add_discount_code %}
     </div>
+    {% endcomment %}
+
   </div>
 </div>
 
@@ -142,7 +146,7 @@
     color: var(--color-foreground);
   }
 
-  .cart-drawer__summary .cart__summary-totals, .cart__ctas, .cart__ctas>button {
+  .cart__summary-totals, .cart__ctas, .cart__ctas>button {
     width: 100%;
   }
 
@@ -161,5 +165,10 @@
     padding: 0;
     gap: var(--gap-xs);
     margin-top: var(--margin-3xs);
+  }
+
+  .cart__total-value {
+    font-weight: 600;
+    font-size: var(--font-size--md);
   }
 {% endstylesheet %}

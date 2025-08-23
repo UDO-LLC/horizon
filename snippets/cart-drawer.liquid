@@ -103,16 +103,13 @@
             aria-label="{{ 'accessibility.cart' | t }}"
             style="--header-height: 60px;"
           >
-            
-            <scroll-hint
-              class="cart-drawer__items"
-            >
+            <scroll-hint class="cart-drawer__items">
               {% render 'cart-products' %}
             </scroll-hint>
-
-            <div
-              class="cart-drawer__summary"
-            >
+            <div class="cart-drawer__upsell">
+              {% render 'cart-upsell' %}
+            </div>
+            <div class="cart-drawer__summary">
               {% render 'cart-summary' %}
             </div>
           </div>
@@ -168,7 +165,7 @@
   }
 
   .cart-drawer__close-button:hover {
-    background-color: var(--color-background-elevated);
+    background-color: var(--color-secondary-button-hover-background);
   }
 
   .cart-drawer__dialog {
@@ -191,5 +188,10 @@
     position: sticky;
     bottom: 0;
     z-index: 1;
+  }
+
+  .cart-drawer__upsell {
+    background-color: var(--color-background);
+    padding: var(--padding-2xs);
   }
 {% endstylesheet %}

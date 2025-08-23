@@ -1812,6 +1812,58 @@
       },
       {
         "type": "header",
+        "content": "t:content.product_media"
+      },
+      {
+        "type": "select",
+        "id": "cart_thumbnail_border",
+        "label": "t:settings.style",
+        "options": [
+          {
+            "value": "none",
+            "label": "t:options.none"
+          },
+          {
+            "value": "solid",
+            "label": "t:options.solid"
+          }
+        ],
+        "default": "none"
+      },
+      {
+        "type": "range",
+        "id": "cart_thumbnail_border_width",
+        "min": 0,
+        "max": 10,
+        "step": 1,
+        "unit": "px",
+        "label": "t:settings.border_width",
+        "default": 1,
+        "visible_if": "{{ settings.cart_thumbnail_border != 'none' }}"
+      },
+      {
+        "type": "range",
+        "id": "cart_thumbnail_border_opacity",
+        "min": 0,
+        "max": 100,
+        "step": 1,
+        "unit": "%",
+        "label": "t:settings.border_opacity",
+        "default": 50,
+        "visible_if": "{{ settings.cart_thumbnail_border != 'none' }}"
+      },
+      {
+        "type": "range",
+        "id": "cart_thumbnail_border_radius",
+        "label": "t:settings.border_radius",
+        "min": 0,
+        "max": 100,
+        "step": 1,
+        "unit": "px",
+        "default": 0
+      },
+      {
+        "type": "header",
         "content": "t:content.special_discount_display"
       },
       {
@@ -1911,6 +1963,70 @@
       },
       {
         "type": "header",
+        "content": "t:content.cart_upsell"
+      },
+      {
+        "type": "checkbox",
+        "id": "show_cart_upsell",
+        "label": "t:settings.show_cart_upsell",
+        "default": true,
+        "info": "t:info.show_cart_upsell"
+      },
+      {
+        "type": "text",
+        "id": "cart_upsell_heading",
+        "label": "t:settings.cart_upsell_heading",
+        "default": "Frequently Bought Together"
+      },
+      {
+        "type": "select",
+        "id": "cart_upsell_source",
+        "label": "t:settings.cart_upsell_source",
+        "options": [
+          {
+            "value": "collection",
+            "label": "t:settings.collection"
+          },
+          {
+            "value": "products",
+            "label": "t:settings.products"
+          }
+        ],
+        "default": "collection",
+        "info": "t:info.cart_upsell_source"
+      },
+      {
+        "type": "collection",
+        "id": "cart_upsell_collection",
+        "label": "t:settings.cart_upsell_collection",
+        "info": "t:info.cart_upsell_collection"
+      },
+      {
+        "type": "product_list",
+        "id": "cart_upsell_products",
+        "label": "t:settings.cart_upsell_products",
+        "info": "t:info.cart_upsell_products"
+      },
+      {
+        "type": "checkbox",
+        "id": "cart_upsell_show_description",
+        "label": "t:settings.cart_upsell_show_description",
+        "default": true
+      },
+      {
+        "type": "checkbox",
+        "id": "cart_upsell_show_compare_price",
+        "label": "t:settings.cart_upsell_show_compare_price",
+        "default": true
+      },
+      {
+        "type": "text",
+        "id": "cart_upsell_button_text",
+        "label": "t:settings.cart_upsell_button_text",
+        "default": "Add"
+      },
+      {
+        "type": "header",
         "content": "t:content.cart_summary"
       },
       {
@@ -1926,58 +2042,6 @@
         "label": "t:settings.show_payment_icons",
         "default": true,
         "info": "t:info.show_payment_icons"
-      },
-      {
-        "type": "header",
-        "content": "t:content.product_media"
-      },
-      {
-        "type": "select",
-        "id": "cart_thumbnail_border",
-        "label": "t:settings.style",
-        "options": [
-          {
-            "value": "none",
-            "label": "t:options.none"
-          },
-          {
-            "value": "solid",
-            "label": "t:options.solid"
-          }
-        ],
-        "default": "none"
-      },
-      {
-        "type": "range",
-        "id": "cart_thumbnail_border_width",
-        "min": 0,
-        "max": 10,
-        "step": 1,
-        "unit": "px",
-        "label": "t:settings.border_width",
-        "default": 1,
-        "visible_if": "{{ settings.cart_thumbnail_border != 'none' }}"
-      },
-      {
-        "type": "range",
-        "id": "cart_thumbnail_border_opacity",
-        "min": 0,
-        "max": 100,
-        "step": 1,
-        "unit": "%",
-        "label": "t:settings.border_opacity",
-        "default": 50,
-        "visible_if": "{{ settings.cart_thumbnail_border != 'none' }}"
-      },
-      {
-        "type": "range",
-        "id": "cart_thumbnail_border_radius",
-        "label": "t:settings.border_radius",
-        "min": 0,
-        "max": 100,
-        "step": 1,
-        "unit": "px",
-        "default": 0
       }
     ]
   },
