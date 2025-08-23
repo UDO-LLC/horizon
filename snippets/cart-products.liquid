@@ -58,7 +58,6 @@
               data-key="{{ item.key }}"
             >
               <div class="cart-items__item-content">
-                <!-- Product link and image -->
                 <a class="cart-items__product-link" href="{{ item.url }}">
                   <div class="cart-items__media-container">
                     {% if item.image or item.properties.preview_image != blank -%}
@@ -103,7 +102,6 @@
                     {%- endif %}
                   </div>
 
-                  <!-- Product details -->
                   <div class="cart-items__details cart-primary-typography">
                     <span class="cart-items__title">
                       {{- item.product.title -}}
@@ -141,9 +139,7 @@
                   </div>
                 </a>
 
-                <!-- Price and quantity section -->
                 <div class="cart-items__controls">
-                  <!-- Price -->
                   <div class="cart-items__price-container">
                     {%- comment -%} Show price display for all items, but with different formatting for discount items {%- endcomment -%}
                     {%- liquid
@@ -168,7 +164,6 @@
                     {%- endif -%}
                   </div>
 
-                  <!-- Quantity selector and remove button -->
                   <div class="cart-items__quantity-section">
                     <div class="cart-items__quantity-container">
                       {% assign can_update_quantity = item.instructions.can_update_quantity
@@ -201,7 +196,6 @@
                 </div>
               </div>
 
-              <!-- Discount allocation display -->
               {%- if item.discount_allocations.size > 0 -%}
                 <div class="cart-items__discount-allocation">
                   {% if settings.show_buy_x_get_y_discount %}
@@ -237,7 +231,6 @@
                 </div>
               {%- endif -%}
 
-              <!-- Error message container -->
               <div
                 class="cart-items__error hidden"
                 ref="cartItemErrorContainer-{{ item.index | plus: 1 }}"
@@ -405,7 +398,7 @@
     gap: var(--gap-xs);
     border-radius: 0.125rem;
     padding: var(--padding-2xs) var(--padding-xs);
-    background-color: var(--color-primary);
+    background-color: var(--buy-x-get-y-icon-active-bg, var(--color-primary));
     color: var(--color-primary-button-text);
   }
 

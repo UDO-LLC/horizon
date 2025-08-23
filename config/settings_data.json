@@ -66,8 +66,10 @@
       "custom-paint-by-numbers-kits",
       "frontpage"
     ],
-    "buy_x_get_y_progress_bar_fill": "#000000",
-    "buy_x_get_y_icon_active_background": "#000000",
+    "buy_x_get_y_progress_bar_fill": "#00ddcf",
+    "buy_x_get_y_icon_active_background": "#00b9dd",
+    "cart_upsell_source": "collection",
+    "cart_upsell_collection": "cart-upsell-products",
     "drawer_drop_shadow": true,
     "icon_stroke": "default",
     "input_border_width": 1,
