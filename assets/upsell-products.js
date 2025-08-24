@@ -1,5 +1,5 @@
 import { Component } from "@theme/component";
-import { ThemeEvents } from "./events.js";
+import { PriceUpdateEvent, ThemeEvents } from "./events.js";
 
 // ============================================================================
 // CONSTANTS
@@ -39,6 +39,7 @@ export const UPSELL_PRODUCT_PREFIX = '_upsell_variant_';
  * @typedef {Object} UpsellProductMatch
  * @property {HTMLInputElement} checkbox - The checkbox element
  * @property {Variant | null} variant - The best matching variant
+ * @property {Variant | null} previousVariant - The previous best matching variant
  */
 
 // ============================================================================
@@ -98,11 +99,11 @@ class UdoPaintsEditorManager {
     try {
       const result = await window.UdoPaintsEditorManager.isReadyToExport();
       this.#isReady = result?.success === true;
-      
+
       if (!this.#isReady) {
         console.warn('UdoPaintsEditorManager: App not ready to export:', result?.error || 'Unknown error');
       }
-      
+
       return this.#isReady;
     } catch (error) {
       console.error('UdoPaintsEditorManager: Error calling isReadyToExport:', error);
@@ -155,17 +156,17 @@ class VariantMatcher {
    */
   static findBestMatchVariant(mainProductVariants, upsellProductId, upsellVariants, upsellOptions) {
     if (!upsellProductId) return null;
-    
+
     const bestMatchVariantId = this.findBestMatchingUpsellVariant(
-      mainProductVariants, 
-      upsellProductId, 
-      upsellVariants, 
+      mainProductVariants,
+      upsellProductId,
+      upsellVariants,
       upsellOptions
     );
-    
+
     const currentUpsellVariants = upsellVariants[upsellProductId];
     const bestMatchVariant = currentUpsellVariants?.find(variant => variant.id === bestMatchVariantId);
-    
+
     return bestMatchVariant || currentUpsellVariants?.[0] || null;
   }
 
@@ -179,10 +180,10 @@ class VariantMatcher {
    */
   static findBestMatchingUpsellVariant(mainProductVariants, upsellProductId, upsellVariants, upsellOptions) {
     if (!upsellProductId) return null;
-    
+
     const upsellProductVariants = upsellVariants[upsellProductId] || [];
     const upsellProductOptions = upsellOptions[upsellProductId] || [];
-    
+
     if (upsellProductVariants.length === 0) return null;
 
     return upsellProductVariants
@@ -190,8 +191,8 @@ class VariantMatcher {
         variantId: variant.id,
         matchScore: this.calculateMatchScore(variant, upsellProductOptions, mainProductVariants)
       }))
-      .reduce((best, current) => 
-        current.matchScore > best.matchScore ? current : best, 
+      .reduce((best, current) =>
+        current.matchScore > best.matchScore ? current : best,
         { variantId: null, matchScore: 0 }
       )
       .variantId;
@@ -207,7 +208,7 @@ class VariantMatcher {
   static calculateMatchScore(upsellVariant, upsellProductOptions, mainProductVariants) {
     let matchScore = 0;
     let totalOptions = 0;
-    
+
     upsellProductOptions.forEach((optionName, optionIndex) => {
       const upsellOptionValue = upsellVariant.options[optionIndex];
       if (upsellOptionValue && mainProductVariants[optionName]) {
@@ -217,7 +218,7 @@ class VariantMatcher {
         }
       }
     });
-    
+
     return totalOptions > 0 ? (matchScore / totalOptions) * 100 : 0;
   }
 
@@ -230,9 +231,9 @@ class VariantMatcher {
    */
   static mapMainProductVariants(variantId, mainProductOptions, mainProductVariants) {
     const mainProductVariant = mainProductVariants.find(variant => variant.id == variantId);
-    
+
     if (!mainProductVariant) return {};
-    
+
     return mainProductOptions.reduce((acc, option) => {
       if (!option.name) return acc;
       acc[option.name] = mainProductVariant.options[option.position - 1] || '';
@@ -252,7 +253,7 @@ class HideConditionManager {
    */
   static parseHideConditions(hideConditionsString) {
     if (!hideConditionsString || hideConditionsString.trim() === '') return [];
-    
+
     return /** @type {HideCondition[]} */ (hideConditionsString
       .split(';')
       .map(condition => this.parseSingleCondition(condition))
@@ -268,24 +269,24 @@ class HideConditionManager {
     // Parse format: OptionName:Value[Upsell Product Name, Upsell Product Name1]
     const regex = /^([^:]+):([^[]+)\[([^\]]+)\]$/;
     const match = regex.exec(condition);
-    
+
     if (!match) {
       console.warn(`HideConditionManager: Invalid hide condition format: ${condition}`);
       return null;
     }
-    
+
     const [, optionName, optionValue, upsellProductNames] = match;
-    
+
     if (!optionName || !optionValue || !upsellProductNames) {
       console.warn(`HideConditionManager: Invalid hide condition format: ${condition}`);
       return null;
     }
-    
+
     const upsellProducts = upsellProductNames
       .split(',')
       .map(name => name.trim())
       .filter(name => name.length > 0);
-    
+
     return {
       optionName: optionName.trim().toLowerCase(),
       optionValue: optionValue.trim().toLowerCase(),
@@ -311,7 +312,7 @@ class HideConditionManager {
 /**
  * Handles price formatting and display
  */
-class PriceFormatter {
+export class PriceFormatter {
   /**
    * Format money
    * @param {number} amount - The amount to format
@@ -321,16 +322,26 @@ class PriceFormatter {
     if (typeof amount === 'string') {
       amount = parseFloat(amount);
     }
-    
-    if (window.Shopify?.formatMoney) {
+
+    if (window.Shopify?.formatMoney && typeof window.Shopify.formatMoney === 'function') {
       return window.Shopify.formatMoney(amount);
     }
-    
+
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
       currency: window.Shopify?.currency?.active || 'USD'
     }).format(amount / 100);
   }
+}
+
+/**
+ * Custom event for checkbox change
+ */
+class CustomEventName {
+  /** @type {string} */
+  static uncheckCausedByCartUpdate = 'checkbox-uncheck-caused-by-cart-update';
+  /** @type {string} */
+  static uncheckCausedByVariantChange = 'checkbox-uncheck-caused-by-variant-change';
 }
 
 // ============================================================================
@@ -434,22 +445,16 @@ class UpsellProducts extends Component {
 
   async #checkReadyToExport() {
     const isReady = await this.#udoPaintsEditor.checkReadyToExport();
-    
     if (isReady) {
       this.showAllUpsellProducts();
-
       const initialMainVariant = VariantMatcher.mapMainProductVariants(
         this.#mainProductSelectedVariantId,
         this.#mainProductOptions,
         this.#mainProductVariants
       );
-      
       this.#updateBestMatchVariants(initialMainVariant);
       this.#checkHideConditions(initialMainVariant);
-      
-      if (this.#form) {
-        this.#syncUpsellProductsBlock();
-      }
+      if (this.#form) this.#syncUpsellProductsBlock();
     } else {
       this.hideAllUpsellProducts();
     }
@@ -471,17 +476,19 @@ class UpsellProducts extends Component {
       this.#mainProductOptions,
       this.#mainProductVariants
     );
-    
     this.#updateBestMatchVariants(initialMainVariant);
-    
     this.#checkboxes.forEach(checkbox => {
       checkbox.addEventListener('change', (event) => {
         this.#handleCheckboxChange(event);
         this.#resetHiddenUpsellInputs();
       }, { signal: this.#abortController.signal });
-      
-      checkbox.addEventListener('checkbox-unchecked', (event) => {
+      checkbox.addEventListener(CustomEventName.uncheckCausedByVariantChange, (event) => {
+        this.#handleCheckboxChange(event, true);
+        this.#resetHiddenUpsellInputs();
+      }, { signal: this.#abortController.signal });
+      checkbox.addEventListener(CustomEventName.uncheckCausedByCartUpdate, (event) => {
         this.#handleCheckboxChange(event);
+        this.#removeExistingUpsellInputs();
       }, { signal: this.#abortController.signal });
     });
   }
@@ -491,9 +498,9 @@ class UpsellProducts extends Component {
       this.#listenForVariantChange(event);
       this.#resetHiddenUpsellInputs();
     }, { signal: this.#abortController.signal });
-    
+
     document.addEventListener(ThemeEvents.cartUpdate, (event) => {
-      this.clearCheckedUpsellProducts();
+      this.clearCheckedUpsellProductsAfterCartUpdate();
       this.#removeExistingUpsellInputs();
     }, { signal: this.#abortController.signal });
   }
@@ -504,20 +511,16 @@ class UpsellProducts extends Component {
    */
   #listenForVariantChange(event) {
     if (!this.#udoPaintsEditor.isReady) return;
-    
     const customEvent = /** @type {CustomEvent} */ (event);
     const variant = customEvent.detail?.resource;
-    
     if (variant) {
       const mappedMainVariant = VariantMatcher.mapMainProductVariants(
         variant.variantId,
         this.#mainProductOptions,
         this.#mainProductVariants
       );
-      
       this.#updateBestMatchVariants(mappedMainVariant);
       this.#checkHideConditions(mappedMainVariant);
-      
       if (this.#udoPaintsEditor.isReady) {
         this.#syncUpsellProductsBlock();
       }
@@ -533,7 +536,7 @@ class UpsellProducts extends Component {
    * @param {Object.<string, string>} mainProductVariants - The main product variants
    */
   #updateBestMatchVariants(mainProductVariants) {
-
+    const previousBestMatchUpsellVariants = [...this.#bestMatchUpsellVariants];
     this.#bestMatchUpsellVariants = Array.from(this.#checkboxes)
       .map(checkbox => ({
         checkbox: checkbox,
@@ -542,7 +545,8 @@ class UpsellProducts extends Component {
           checkbox.dataset.upsellId,
           this.#upsellVariants,
           this.#upsellOptions
-        )
+        ),
+        previousVariant: previousBestMatchUpsellVariants.find(upsell => upsell.checkbox === checkbox)?.variant ?? null
       }));
   }
 
@@ -553,15 +557,12 @@ class UpsellProducts extends Component {
     this.#mainProductOptions = JSON.parse(
       this.querySelector('script[data-main-product-options]')?.textContent || '[]'
     );
-
     this.#mainProductVariants = JSON.parse(
       this.querySelector('script[data-main-product-variants]')?.textContent || '[]'
     );
-
     this.#checkboxes.forEach(checkbox => {
       const upsellId = checkbox.dataset.upsellId;
       if (!upsellId) return;
-      
       try {
         this.#upsellVariants[upsellId] = JSON.parse(
           this.querySelector(`script[data-upsell-variants][data-upsell-id="${upsellId}"]`)?.textContent || '[]'
@@ -590,7 +591,6 @@ class UpsellProducts extends Component {
       this.hideAllUpsellProducts();
       return;
     }
-    
     const normalizedOptions = HideConditionManager.normalizeOptions(mappedMainVariant);
     this.#checkIndividualHideConditions(normalizedOptions);
   }
@@ -606,11 +606,9 @@ class UpsellProducts extends Component {
       const item = /** @type {HTMLElement} */ (checkbox.closest('.upsell-product__item'));
       this.showUpsellProduct(upsellId, item);
     });
-    
     // Then check each hide condition
     this.#hideConditions.forEach(condition => {
       const optionValue = normalizedOptions[condition.optionName];
-      
       if (optionValue && optionValue == condition.optionValue) {
         condition.upsellProducts.forEach(upsellProductName => {
           this.#hideUpsellProductByName(upsellProductName);
@@ -627,12 +625,9 @@ class UpsellProducts extends Component {
     this.#checkboxes.forEach(checkbox => {
       const item = /** @type {HTMLElement} */ (checkbox.closest('.upsell-product__item'));
       const productNameElement = /** @type {HTMLElement} */ (item.querySelector('.upsell-product__content h4'));
-      
       if (!productNameElement) return;
-      
       const elementText = productNameElement.textContent?.trim().toLowerCase();
       const targetName = upsellProductName.toLowerCase();
-      
       if (elementText === targetName) {
         const upsellId = checkbox.dataset.upsellId;
         this.hideUpsellProduct(upsellId, item);
@@ -649,14 +644,30 @@ class UpsellProducts extends Component {
    */
   #syncUpsellProductsBlock() {
     if (!this.#udoPaintsEditor.isReady) return;
-    
+
     this.#bestMatchUpsellVariants
       .filter(upsell => !this.#hiddenUpsellProducts.has(upsell.checkbox.dataset.upsellId || ''))
-      .forEach(upsell => this.#setUpsellProductPrice(
-        upsell.checkbox.dataset.upsellId,
-        upsell.variant?.price,
-        upsell.variant?.compare_at_price
-      ));
+      .forEach(upsell => {
+        const success =this.#setUpsellProductPrice(
+          upsell.checkbox.dataset.upsellId,
+          upsell.variant?.price,
+          upsell.variant?.compare_at_price
+        );
+        if (success && upsell.checkbox.checked) {
+          this.#triggerUpsellPriceUpdate(upsell.variant, upsell.previousVariant);
+        }
+      });
+  }
+
+  /**
+   * Trigger the upsell price update
+   * @param {Variant | null} variant - The new variant
+   * @param {Variant | null} previousVariant - The previous variant
+   */
+  #triggerUpsellPriceUpdate(variant, previousVariant) {
+    if (!variant || !previousVariant) return;
+    const delta = variant.price - previousVariant.price;
+    document.dispatchEvent(new PriceUpdateEvent(delta, '', { variantId: variant.id }));
   }
 
   /**
@@ -672,20 +683,20 @@ class UpsellProducts extends Component {
       console.warn('UpsellProducts: Invalid parameters provided for setUpsellProductPrice');
       return false;
     }
-    
+
     const upsellItem = this.querySelector(`[data-upsell-product="${upsellProductId}"]`);
     if (!upsellItem) {
       console.warn(`UpsellProducts: Upsell product with ID ${upsellProductId} not found`);
       return false;
     }
-    
+
     const currentPriceElement = /** @type {HTMLElement} */ (upsellItem.querySelector('.upsell-product__current-price'));
     const comparePriceElement = /** @type {HTMLElement} */ (upsellItem.querySelector('.upsell-product__compare-price'));
-    
+
     if (currentPriceElement) {
       currentPriceElement.textContent = PriceFormatter.formatMoney(newPrice);
     }
-    
+
     if (newComparePrice && newComparePrice > newPrice) {
       if (comparePriceElement) {
         comparePriceElement.textContent = PriceFormatter.formatMoney(newComparePrice);
@@ -694,7 +705,7 @@ class UpsellProducts extends Component {
     } else if (comparePriceElement) {
       comparePriceElement.style.display = 'none';
     }
-    
+
     return true;
   }
 
@@ -719,7 +730,6 @@ class UpsellProducts extends Component {
       .map(upsell => upsell.variant)
       .forEach(variant => {
         if (!variant || !this.#form) return;
-        
         const hiddenInput = this.#form.ownerDocument.createElement('input');
         hiddenInput.type = 'hidden';
         hiddenInput.name = `${UPSELL_PRODUCT_PREFIX}${variant.id}`;
@@ -733,7 +743,6 @@ class UpsellProducts extends Component {
    */
   #removeExistingUpsellInputs() {
     if (!this.#form) return;
-    
     const existingUpsellInputs = /** @type {NodeListOf<HTMLInputElement>} */ (
       this.#form.querySelectorAll(`[name^="${UPSELL_PRODUCT_PREFIX}"]`)
     );
@@ -747,29 +756,31 @@ class UpsellProducts extends Component {
   /**
    * Handle checkbox change event
    * @param {Event} event - The event object
+   * @param {boolean} variantChanged - Whether the variant changed
    */
-  #handleCheckboxChange(event) {
+  #handleCheckboxChange(event, variantChanged = false) {
     const checkbox = /** @type {HTMLInputElement} */ (event.target);
     const item = /** @type {HTMLElement} */ (checkbox.closest('.upsell-product__item'));
-    
     if (!item) return;
-    
+    const upsell = this.#bestMatchUpsellVariants.find(upsell => upsell.checkbox === checkbox);
+    const { id, price } = variantChanged ? upsell?.previousVariant || {} : upsell?.variant || {};
     if (checkbox.checked) {
       item.classList.add('upsell-product__item--selected');
+      document.dispatchEvent(new PriceUpdateEvent(price || 0, '', { variantId: id }));
     } else {
       item.classList.remove('upsell-product__item--selected');
+      document.dispatchEvent(new PriceUpdateEvent(-(price || 0), '', { variantId: id }));
     }
-    
     this.#updateButtonStyling();
   }
 
   #updateButtonStyling() {
     if (!this.#enableButtonStyling || !this.#addToCartButton) return;
-    
+
     const hasSelectedUpsells = Array.from(this.#checkboxes)
       .filter(checkbox => !this.#hiddenUpsellProducts.has(checkbox.dataset.upsellId || ''))
       .some(checkbox => checkbox.checked);
-    
+
     if (hasSelectedUpsells) {
       this.#addToCartButton.classList.add('btn--upsell-selected');
     } else {
@@ -777,11 +788,11 @@ class UpsellProducts extends Component {
     }
   }
 
-  clearCheckedUpsellProducts() {
+  clearCheckedUpsellProductsAfterCartUpdate() {
     this.#checkboxes.forEach(checkbox => {
       if (checkbox.checked) {
         checkbox.checked = false;
-        checkbox.dispatchEvent(new CustomEvent('checkbox-unchecked'));
+        checkbox.dispatchEvent(new CustomEvent(CustomEventName.uncheckCausedByCartUpdate));
       }
     });
   }
@@ -792,14 +803,14 @@ class UpsellProducts extends Component {
    */
   getFormDataAsObject() {
     if (!this.#form) return {};
-    
+
     const formData = new FormData(this.#form);
     const formDataObj = /** @type {Object.<string, any>} */ ({});
-    
+
     for (let [key, value] of formData.entries()) {
       formDataObj[key] = value;
     }
-    
+
     return formDataObj;
   }
 
@@ -814,15 +825,13 @@ class UpsellProducts extends Component {
    */
   hideUpsellProduct(upsellId, item) {
     if (!item || !upsellId) return;
-    
     this.#hiddenUpsellProducts.add(upsellId);
     item.classList.add('upsell-product--hidden');
-
     // Uncheck the checkbox if it's hidden
     const checkbox = /** @type {HTMLInputElement} */ (item.querySelector('.upsell-product__checkbox-input'));
     if (checkbox?.checked) {
       checkbox.checked = false;
-      checkbox.dispatchEvent(new Event('change'));
+      checkbox.dispatchEvent(new CustomEvent(CustomEventName.uncheckCausedByVariantChange));
     }
   }
 
@@ -833,7 +842,7 @@ class UpsellProducts extends Component {
    */
   showUpsellProduct(upsellId, item) {
     if (!item) return;
-    
+
     this.#hiddenUpsellProducts.delete(upsellId || '');
     item.classList.remove('upsell-product--hidden');
   }

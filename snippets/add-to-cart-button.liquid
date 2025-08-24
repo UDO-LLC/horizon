@@ -7,6 +7,7 @@
   @param {boolean} [icon_only_on_mobile] - If `true`, only the icon is shown on mobile devices.
   @param {string} [class] - Additional CSS classes to apply to the button.
   @param {string} [id] - The ID attribute for the button.
+  @param {boolean} [should_show_price] - Whether to show the price in the button.
 {%- enddoc -%}
 
 {%- liquid
@@ -15,6 +16,8 @@
   if product.selected_or_first_available_variant.featured_media.preview_image == blank
     assign product_variant_media = product.featured_media.preview_image | image_url: width: 100
   endif
+  
+  assign show_price_in_button = should_show_price | default: false
 -%}
 
 <add-to-cart-component
@@ -44,6 +47,15 @@
       <span class="add-to-cart-text__content{% if icon_only_on_mobile %} is-visually-hidden-mobile{% endif %}">
         {{- add_to_cart_text | default: default_add_to_cart_text -}}
       </span>
+      {% if can_add_to_cart and show_price_in_button %}
+        <span class="add-to-cart-text__separator">|</span>
+        <span 
+          class="add-to-cart-text__price"
+          data-price="{{ product.selected_or_first_available_variant.price }}"
+        >
+          {{- product.selected_or_first_available_variant.price | money -}}
+        </span>
+      {% endif %}
     </span>
     <span aria-hidden="true" class="add-to-cart-spinner">
       <span class="spinner"></span>
@@ -69,13 +81,15 @@
 
   .add-to-cart-text {
     display: flex;
-    gap: var(--gap-2xs);
+    gap: var(--gap-xs);
     align-items: center;
     justify-content: center;
     animation-duration: var(--animation-speed);
     animation-timing-function: var(--animation-easing);
     animation-fill-mode: forwards;
     transition: opacity var(--animation-speed) var(--animation-easing);
+    font-size: var(--font-size--md);
+    font-weight: 500;
   }
 
   .atc-added .add-to-cart-text {

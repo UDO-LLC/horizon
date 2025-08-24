@@ -180,7 +180,8 @@
     "show_cart_upsell": "Display recommended products in the cart drawer",
     "cart_upsell_source": "Choose between collection or specific products",
     "cart_upsell_collection": "Select a collection to source upsell products from",
-    "cart_upsell_products": "Select specific products to show as upsells"
+    "cart_upsell_products": "Select specific products to show as upsells",
+    "show_price_in_add_to_cart_button": "Display the product price alongside the button text"
   },
   "names": {
     "product_title": "Product title",
@@ -631,6 +632,7 @@
     "animation_repeat": "Repeat animation",
     "add_discount_code": "Allow discounts in cart",
     "add_to_cart_animation": "Add to cart",
+    "show_price_in_add_to_cart_button": "Show price in button",
     "always_stack_buttons": "Always stack buttons",
     "aspect_ratio": "Aspect ratio",
     "auto_rotate_announcements": "Auto-rotate announcements",

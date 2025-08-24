@@ -102,7 +102,8 @@
           class: 'button quick-add__button quick-add__button--add',
           can_add_to_cart: can_add_to_cart,
           icon_only_on_mobile: true,
-          product: product
+          product: product,
+          should_show_price: false
         %}
       {%- endif -%}
       {%- if product.variants.size > 1 -%}

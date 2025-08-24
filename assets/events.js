@@ -30,6 +30,8 @@ export class ThemeEvents {
   static variantPickerMorphed = 'variant-picker:morphed';
   /** @static @constant {string} Event triggered when the main content is morphed */
   static mainMorphed = 'main:morphed';
+  /** @static @constant {string} Event triggered when a price is updated */
+  static priceUpdate = 'price:update';
 }
 
 /**
@@ -306,5 +308,31 @@ export class MainMorphedEvent extends Event {
   constructor(data) {
     super(ThemeEvents.mainMorphed, { bubbles: true });
     this.detail = data;
+  }
+}
+
+/**
+ * Event class for price updates
+ * @extends {Event}
+ */
+export class PriceUpdateEvent extends Event {
+  /**
+   * Creates a new PriceUpdateEvent
+   * @param {number} delta - The amount to add (positive) or subtract (negative) from the total price
+   * @param {string} sourceId - The id of the element the action was triggered from
+   * @param {Object} [data] - Additional event data
+   * @param {string} [data.productId] - The id of the product being updated
+   * @param {string} [data.variantId] - The id of the variant being updated
+   * @param {number} [data.quantity] - The quantity being added
+   */
+  constructor(delta, sourceId, data) {
+    super(ThemeEvents.priceUpdate, { bubbles: true });
+    this.detail = {
+      delta,
+      sourceId,
+      data: {
+        ...data,
+      },
+    };
   }
 }

@@ -20,7 +20,8 @@
     class: class,
     can_add_to_cart: can_add_to_cart,
     product: closest.product,
-    add_to_cart_text: add_to_cart_text
+    add_to_cart_text: add_to_cart_text,
+    should_show_price: block.settings.should_show_price_in_add_to_cart_button
   %}
 </span>
 
@@ -44,6 +45,13 @@
         }
       ],
       "default": "button-secondary"
+    },
+    {
+      "type": "checkbox",
+      "id": "should_show_price_in_add_to_cart_button",
+      "label": "t:settings.show_price_in_add_to_cart_button",
+      "default": true,
+      "info": "t:info.show_price_in_add_to_cart_button"
     }
   ]
 }

@@ -1,9 +1,9 @@
 import { Component } from '@theme/component';
 import { fetchConfig, onAnimationEnd, preloadImage } from '@theme/utilities';
-import { ThemeEvents, CartAddEvent, CartErrorEvent, VariantUpdateEvent } from '@theme/events';
+import { ThemeEvents, CartAddEvent, CartErrorEvent, VariantUpdateEvent, PriceUpdateEvent } from '@theme/events';
 import { cartPerformance } from '@theme/performance';
 import { morph } from '@theme/morph';
-import { UPSELL_PRODUCT_PREFIX } from './upsell-products.js';
+import { PriceFormatter, UPSELL_PRODUCT_PREFIX } from './upsell-products.js';
 
 export const ADD_TO_CART_TEXT_ANIMATION_DURATION = 2000;
 
@@ -23,9 +23,20 @@ export class AddToCartComponent extends Component {
   /** @type {number | undefined} */
   #cleanupTimeout;
 
+  /** @type {AbortController} */
+  #abortController = new AbortController();
+
+  /** @type {number} */
+  #currentPrice = 0;
+
+  /** @type {number} */
+  #originalVariantPrice = 0;
+
   connectedCallback() {
     super.connectedCallback();
     this.addEventListener('pointerenter', this.#preloadImage);
+    this.#listenToPriceUpdates();
+    this.#initializePrice();
   }
 
   disconnectedCallback() {
@@ -33,6 +44,7 @@ export class AddToCartComponent extends Component {
     if (this.#animationTimeout) clearTimeout(this.#animationTimeout);
     if (this.#cleanupTimeout) clearTimeout(this.#cleanupTimeout);
     this.removeEventListener('pointerenter', this.#preloadImage);
+    this.#abortController.abort();
   }
 
   /**
@@ -148,6 +160,89 @@ export class AddToCartComponent extends Component {
         this.refs.addToCartButton.classList.remove('atc-added');
       }, 10);
     }, ADD_TO_CART_TEXT_ANIMATION_DURATION);
+  }
+
+  /**
+   * Listens for price update events and updates the button price accordingly.
+   */
+  #listenToPriceUpdates() {
+    const { signal } = this.#abortController;
+    document.addEventListener(ThemeEvents.priceUpdate, this.#onPriceUpdate, { signal });
+  }
+
+  /**
+   * Handles price update events.
+   * @param {PriceUpdateEvent} event - The price update event.
+   */
+  #onPriceUpdate = (event) => {
+    const { delta, sourceId } = event.detail;
+    // Only update if this component is the target or if no specific target is specified
+    if (sourceId && sourceId !== this.id && !this.closest(`[data-section-id="${sourceId}"]`)) {
+      console.log('PriceUpdateEvent: onPriceUpdate: Skipping', sourceId, this.id);
+      return;
+    }
+    this.#currentPrice += delta;
+    this.#updatePriceDisplay();
+  };
+
+  /**
+   * Updates the price display in the add to cart button.
+   */
+  #updatePriceDisplay() {
+    const { addToCartButton } = this.refs;
+    if (!addToCartButton) return;
+    const priceElement = addToCartButton.querySelector('.add-to-cart-text__price');
+    if (!priceElement) return;
+    const formattedPrice = PriceFormatter.formatMoney(this.#currentPrice);
+    priceElement.textContent = formattedPrice;
+  }
+
+  /**
+   * Initializes the current price from the existing price in the button.
+   */
+  #initializePrice() {
+    const { addToCartButton } = this.refs;
+    if (!addToCartButton) return;
+    const priceElement = addToCartButton.querySelector('.add-to-cart-text__price');
+    if (!priceElement) return;
+    // Get the original price value from the data attribute
+    const originalPriceString = priceElement.getAttribute('data-price') ?? this.#getFallbackPrice() ?? '0';
+    const originalPrice = parseFloat(originalPriceString);
+    if (this.#originalVariantPrice !== originalPrice) {
+      this.#currentPrice = this.#currentPrice - this.#originalVariantPrice + originalPrice;
+      this.#originalVariantPrice = originalPrice;
+    }
+    this.#updatePriceDisplay();
+  }
+
+  /**
+   * Extracts the numeric value from the text content of the price element.
+   */
+  #getFallbackPrice() {
+    const { addToCartButton } = this.refs;
+    if (!addToCartButton) return null;
+    const priceElement = addToCartButton.querySelector('.add-to-cart-text__price');
+    if (!priceElement) return null;
+    const priceText = priceElement.textContent?.trim() || '';
+    const priceMatch = priceText.match(/[\d,]+\.?\d*/);
+    if (!priceMatch) return null;
+    return priceMatch[0].replace(/,/g, '');
+  }
+
+  /**
+   * Resets the current price to the base variant price.
+   * Call this when the variant changes to reset any accumulated price modifications.
+   */
+  resetPrice() {
+    this.#initializePrice();
+  }
+
+  /**
+   * Gets the current price in cents.
+   * @returns {number} The current price in cents.
+   */
+  getCurrentPrice() {
+    return this.#currentPrice;
   }
 }
 
@@ -423,6 +518,9 @@ class ProductFormComponent extends Component {
       productVariantMedia &&
         addToCartButtonContainer?.setAttribute('data-product-variant-media', productVariantMedia + '&width=100');
     }
+
+    // Reset the price to the new variant's base price
+    addToCartButtonContainer?.resetPrice();
   };
 
   /**
