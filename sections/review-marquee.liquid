@@ -1,0 +1,518 @@
+{% liquid
+  assign header_content = section.settings.header_content
+  assign header_font_size = section.settings.header_font_size
+  assign header_color = section.settings.header_color
+  assign description_content = section.settings.description_content
+  assign description_font_size = section.settings.description_font_size
+  assign description_color = section.settings.description_color
+  assign text_align = section.settings.text_align
+  assign image_height = section.settings.image_height | default: 240
+  assign image_rows = section.settings.image_rows
+  assign scroll_speed = section.settings.scroll_speed | default: 50
+  
+  # Get all valid image blocks
+  assign image_blocks = section.blocks | where: 'type', 'review_image'
+  assign total_images = image_blocks.size
+  
+  # Calculate images per row with better distribution
+  assign images_per_row = total_images | divided_by: image_rows | at_least: 1
+  assign remainder = total_images | modulo: image_rows
+%}
+
+<div class="review-marquee" style="{% render 'spacing-padding', settings: section.settings %}">
+  <div class="review-marquee__container">
+    {% if header_content != blank or description_content != blank %}
+      <div class="review-marquee__header" style="text-align: {{ text_align }};">
+        {% if header_content != blank %}
+          <div 
+            class="review-marquee__header-content"
+            style="
+              font-size: {{ header_font_size }}px;
+              color: {{ header_color }};
+            "
+          >
+            {{ header_content }}
+          </div>
+        {% endif %}
+        
+         {% if description_content != blank %}
+           <div 
+             class="review-marquee__description review-marquee__description--{{ text_align }}"
+             style="
+               font-size: {{ description_font_size }}px;
+               color: {{ description_color }};
+             "
+           >
+             {{ description_content }}
+           </div>
+         {% endif %}
+      </div>
+    {% endif %}
+
+    {% if total_images > 0 %}
+      <div class="review-marquee__gallery" role="region" aria-label="Customer review images">
+        {% for row_index in (1..image_rows) %}
+          {% liquid
+            assign base_images = images_per_row
+            if row_index <= remainder
+              assign base_images = images_per_row | plus: 1
+            endif
+            
+            # Calculate start and end indices for this row
+            assign start_index = 0
+            for i in (1..row_index)
+              if i < row_index
+                if i <= remainder
+                  assign start_index = start_index | plus: images_per_row | plus: 1
+                else
+                  assign start_index = start_index | plus: images_per_row
+                endif
+              endif
+            endfor
+            assign end_index = start_index | plus: base_images | minus: 1
+          %}
+          
+          <div class="review-marquee__row">
+            <div class="review-marquee__scroll-container" style="--scroll-speed: {{ scroll_speed }}s; --image-height: {{ image_height }}px;">
+              <div class="review-marquee__scroll-content" data-marquee-row="{{ row_index }}">
+                {% for block_index in (start_index..end_index) %}
+                  {% assign block = image_blocks[block_index] %}
+                  {% if block.settings.image != blank %}
+                    <div class="review-marquee__image-wrapper" {{ block.shopify_attributes }}>
+                      <img
+                        src="{{ block.settings.image | image_url }}"
+                        alt="{{ block.settings.image.alt | default: 'Customer review image' }}"
+                        width="{{ block.settings.image.width }}"
+                        height="{{ block.settings.image.height }}"
+                        loading="lazy"
+                        class="review-marquee__image"
+                        decoding="async"
+                      >
+                    </div>
+                  {% endif %}
+                {% endfor %}
+              </div>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    {% endif %}
+  </div>
+</div>
+
+{% stylesheet %}
+  .review-marquee {
+    width: 100%;
+    background-color: var(--color-background);
+    padding: 2.5rem 0;
+  }
+
+  @media (min-width: 640px) {
+    .review-marquee {
+      padding: 3.5rem 0;
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .review-marquee {
+      padding: 4rem 0;
+    }
+  }
+
+  .review-marquee__container {
+    margin: 0 auto;
+    padding: 0 var(--full-page-margin-inline-offset);
+  }
+
+  .review-marquee__header {
+    margin-bottom: 1rem;
+  }
+
+  .review-marquee__header-content {
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+    text-transform: uppercase;
+  }
+
+  .review-marquee__description {
+    max-width: 42rem;
+  }
+
+  .review-marquee__description--left {
+    margin: 0;
+    text-align: left;
+  }
+
+  .review-marquee__description--center {
+    margin: 0 auto;
+    text-align: center;
+  }
+
+  .review-marquee__description--right {
+    margin: 0 0 0 auto;
+    text-align: right;
+  }
+
+  .review-marquee__gallery {
+    margin-top: 2rem;
+  }
+
+  .review-marquee__row {
+    margin-bottom: 1rem;
+  }
+
+  .review-marquee__row:last-child {
+    margin-bottom: 0;
+  }
+
+  .review-marquee__scroll-container {
+    overflow: hidden;
+    direction: ltr;
+    position: relative;
+  }
+
+  .review-marquee__scroll-content {
+    display: flex;
+    width: fit-content;
+    gap: 0.5rem;
+  }
+
+  .review-marquee__image-wrapper {
+    flex-shrink: 0;
+    padding: 0 0.5rem;
+    height: var(--image-height, 240px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.2s ease;
+  }
+
+  .review-marquee__image-wrapper:hover {
+    transform: scale(1.05);
+  }
+
+  .review-marquee__image {
+    max-height: 100%;
+    max-width: 100%;
+    width: auto;
+    height: auto;
+    border-radius: 0.5rem;
+    object-fit: scale-down;
+    transition: filter 0.2s ease;
+  }
+
+  .review-marquee__image-wrapper:hover .review-marquee__image {
+    filter: brightness(1.1);
+  }
+
+  /* Responsive improvements */
+  @media (max-width: 768px) {
+    .review-marquee__image-wrapper {
+      padding: 0 0.25rem;
+    }
+    
+    .review-marquee__scroll-content {
+      gap: 0.25rem;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .review-marquee__scroll-content {
+      animation: none;
+    }
+    
+    .review-marquee__image-wrapper:hover {
+      transform: none;
+    }
+    
+    .review-marquee__image-wrapper:hover .review-marquee__image {
+      filter: none;
+    }
+  }
+{% endstylesheet %}
+
+{% javascript %}
+  class ReviewMarquee {
+    constructor() {
+      this.rows = document.querySelectorAll('.review-marquee__scroll-content');
+      this.animations = new Map();
+      this.init();
+    }
+
+    init() {
+      this.rows.forEach(row => {
+        this.setupMarquee(row);
+      });
+      
+      // Add pause on hover functionality
+      this.setupPauseOnHover();
+    }
+
+    setupMarquee(row) {
+      const container = row.closest('.review-marquee__scroll-container');
+      const scrollSpeed = parseFloat(getComputedStyle(container).getPropertyValue('--scroll-speed')) || 30;
+      
+      // Calculate the total width of all images
+      const totalWidth = row.scrollWidth;
+      const containerWidth = container.clientWidth;
+      
+      // Only animate if content is wider than container
+      if (totalWidth <= containerWidth) return;
+      
+      // Calculate the distance to scroll (total width minus container width)
+      const scrollDistance = totalWidth - containerWidth;
+      
+      // Create keyframes dynamically
+      const keyframes = [
+        { transform: 'translateX(0)' },
+        { transform: `translateX(-${scrollDistance}px)` }
+      ];
+      
+      const options = {
+        duration: scrollSpeed * 1000,
+        easing: 'linear',
+        iterations: Infinity
+      };
+      
+      // Apply animation and store reference
+      const animation = row.animate(keyframes, options);
+      this.animations.set(row, animation);
+    }
+
+    setupPauseOnHover() {
+      const gallery = document.querySelector('.review-marquee__gallery');
+      if (!gallery) return;
+
+      gallery.addEventListener('mouseenter', () => {
+        this.pauseAll();
+      });
+
+      gallery.addEventListener('mouseleave', () => {
+        this.resumeAll();
+      });
+
+      // Pause on touch devices when user touches
+      gallery.addEventListener('touchstart', () => {
+        this.pauseAll();
+      });
+
+      gallery.addEventListener('touchend', () => {
+        this.resumeAll();
+      });
+    }
+
+    pauseAll() {
+      this.animations.forEach(animation => {
+        animation.pause();
+      });
+    }
+
+    resumeAll() {
+      this.animations.forEach(animation => {
+        animation.play();
+      });
+    }
+
+    // Method to handle window resize
+    handleResize() {
+      // Clear existing animations
+      this.animations.forEach(animation => {
+        animation.cancel();
+      });
+      this.animations.clear();
+      
+      // Reinitialize
+      this.init();
+    }
+  }
+
+  // Initialize when DOM is ready
+  let marquee;
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => {
+      marquee = new ReviewMarquee();
+    });
+  } else {
+    marquee = new ReviewMarquee();
+  }
+
+  // Handle window resize
+  let resizeTimeout;
+  window.addEventListener('resize', () => {
+    clearTimeout(resizeTimeout);
+    resizeTimeout = setTimeout(() => {
+      if (marquee) {
+        marquee.handleResize();
+      }
+    }, 250);
+  });
+{% endjavascript %}
+
+{% schema %}
+{
+  "name": "t:names.review_marquee",
+  "tag": "section",
+  "class": "review-marquee",
+  "blocks": [
+    {
+      "type": "review_image",
+      "name": "t:names.review_image",
+      "settings": [
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Review Image"
+        }
+      ]
+    }
+  ],
+  "settings": [
+    {
+      "type": "header",
+      "content": "Header Content"
+    },
+    {
+      "type": "richtext",
+      "id": "header_content",
+      "label": "Header Content",
+      "default": "<p>Discover What Makes Us Special</p>"
+    },
+    {
+      "type": "range",
+      "id": "header_font_size",
+      "label": "Header Font Size",
+      "min": 12,
+      "max": 48,
+      "step": 1,
+      "default": 16,
+      "unit": "px"
+    },
+    {
+      "type": "color",
+      "id": "header_color",
+      "label": "Header Color",
+      "default": "#000000"
+    },
+    {
+      "type": "header",
+      "content": "Description Content"
+    },
+    {
+      "type": "richtext",
+      "id": "description_content",
+      "label": "Description Content",
+      "default": "<p>Every review tells a story of success. Discover why our customers choose us and how our products have made a meaningful difference in their lives. From improved skills to completed masterpieces, these authentic testimonials show the real impact of choosing quality and craftsmanship.</p>"
+    },
+    {
+      "type": "range",
+      "id": "description_font_size",
+      "label": "Description Font Size",
+      "min": 12,
+      "max": 32,
+      "step": 1,
+      "default": 16,
+      "unit": "px"
+    },
+    {
+      "type": "color",
+      "id": "description_color",
+      "label": "Description Color",
+      "default": "#555555"
+    },
+    {
+      "type": "select",
+      "id": "text_align",
+      "label": "Text Alignment",
+      "options": [
+        {
+          "value": "left",
+          "label": "Left"
+        },
+        {
+          "value": "center",
+          "label": "Center"
+        },
+        {
+          "value": "right",
+          "label": "Right"
+        }
+      ],
+      "default": "center"
+    },
+    {
+      "type": "header",
+      "content": "Gallery Settings"
+    },
+    {
+      "type": "range",
+      "id": "image_height",
+      "label": "Max Image Height",
+      "min": 120,
+      "max": 400,
+      "step": 10,
+      "default": 240,
+      "unit": "px"
+    },
+    {
+      "type": "range",
+      "id": "image_rows",
+      "label": "Number of Image Rows",
+      "min": 1,
+      "max": 5,
+      "step": 1,
+      "default": 1
+    },
+    {
+      "type": "range",
+      "id": "scroll_speed",
+      "label": "Scroll Speed",
+      "min": 10,
+      "max": 110,
+      "step": 1,
+      "default": 50,
+      "unit": "s"
+    },
+    {
+      "type": "header",
+      "content": "t:content.padding"
+    },
+    {
+      "type": "range",
+      "id": "padding-block-start",
+      "label": "t:settings.top",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 40
+    },
+    {
+      "type": "range",
+      "id": "padding-block-end",
+      "label": "t:settings.bottom",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 40
+    }
+  ],
+  "presets": [
+    {
+      "name": "t:names.review_marquee",
+      "blocks": {
+        "review_image_1": {
+          "type": "review_image"
+        },
+        "review_image_2": {
+          "type": "review_image"
+        },
+        "review_image_3": {
+          "type": "review_image"
+        }
+      },
+      "block_order": ["review_image_1", "review_image_2", "review_image_3"]
+    }
+  ]
+}
+{% endschema %}
