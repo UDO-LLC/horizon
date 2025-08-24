@@ -125,7 +125,7 @@
       {{ promotion_title | escape }}
     </span>
     <span class="cart-discount-buy-x-get-y__progress-text">
-      {{ eligible_quantity }}/{{ required_quantity }} {{ item_label }}
+      {{ eligible_quantity }}/{{ required_quantity | plus: max_free_items_count }} {{ item_label }}
     </span>
   </div>
 
