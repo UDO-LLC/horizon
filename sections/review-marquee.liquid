@@ -7,8 +7,11 @@
   assign description_color = section.settings.description_color
   assign text_align = section.settings.text_align
   assign image_height = section.settings.image_height | default: 240
+  assign image_height_mobile = section.settings.image_height_mobile | default: 160
   assign image_rows = section.settings.image_rows
   assign scroll_speed = section.settings.scroll_speed | default: 50
+  assign pause_on_hover = section.settings.pause_on_hover
+  assign enable_hover_effects = section.settings.enable_hover_effects
   
   # Get all valid image blocks
   assign image_blocks = section.blocks | where: 'type', 'review_image'
@@ -50,7 +53,7 @@
     {% endif %}
 
     {% if total_images > 0 %}
-      <div class="review-marquee__gallery" role="region" aria-label="Customer review images">
+      <div class="review-marquee__gallery" role="region" aria-label="Customer review images" {% if pause_on_hover %}data-pause-on-hover="true"{% endif %} {% if enable_hover_effects %}data-hover-effects="true"{% endif %}>
         {% for row_index in (1..image_rows) %}
           {% liquid
             assign base_images = images_per_row
@@ -73,7 +76,7 @@
           %}
           
           <div class="review-marquee__row">
-            <div class="review-marquee__scroll-container" style="--scroll-speed: {{ scroll_speed }}s; --image-height: {{ image_height }}px;">
+             <div class="review-marquee__scroll-container" style="--scroll-speed: {{ scroll_speed }}s; --image-height: {{ image_height }}px; --image-height-mobile: {{ image_height_mobile }}px;">
               <div class="review-marquee__scroll-content" data-marquee-row="{{ row_index }}">
                 {% for block_index in (start_index..end_index) %}
                   {% assign block = image_blocks[block_index] %}
@@ -180,11 +183,17 @@
   .review-marquee__image-wrapper {
     flex-shrink: 0;
     padding: 0 0.5rem;
-    height: var(--image-height, 240px);
+    height: var(--image-height-mobile, 160px);
     display: flex;
     align-items: center;
     justify-content: center;
     transition: transform 0.2s ease;
+  }
+
+  @media (min-width: 768px) {
+    .review-marquee__image-wrapper {
+      height: var(--image-height, 240px);
+    }
   }
 
   .review-marquee__image-wrapper:hover {
@@ -203,6 +212,15 @@
 
   .review-marquee__image-wrapper:hover .review-marquee__image {
     filter: brightness(1.1);
+  }
+
+  /* Disable hover effects when not enabled */
+  .review-marquee__gallery:not([data-hover-effects="true"]) .review-marquee__image-wrapper:hover {
+    transform: none;
+  }
+
+  .review-marquee__gallery:not([data-hover-effects="true"]) .review-marquee__image-wrapper:hover .review-marquee__image {
+    filter: none;
   }
 
   /* Responsive improvements */
@@ -281,7 +299,7 @@
 
     setupPauseOnHover() {
       const gallery = document.querySelector('.review-marquee__gallery');
-      if (!gallery) return;
+      if (!gallery || !gallery.hasAttribute('data-pause-on-hover')) return;
 
       gallery.addEventListener('mouseenter', () => {
         this.pauseAll();
@@ -446,11 +464,21 @@
     {
       "type": "range",
       "id": "image_height",
-      "label": "Max Image Height",
+      "label": "Max Image Height (Desktop)",
       "min": 120,
       "max": 400,
       "step": 10,
       "default": 240,
+      "unit": "px"
+    },
+    {
+      "type": "range",
+      "id": "image_height_mobile",
+      "label": "Max Image Height (Mobile)",
+      "min": 80,
+      "max": 300,
+      "step": 10,
+      "default": 160,
       "unit": "px"
     },
     {
@@ -471,6 +499,20 @@
       "step": 1,
       "default": 50,
       "unit": "s"
+    },
+    {
+      "type": "checkbox",
+      "id": "pause_on_hover",
+      "label": "Pause on Hover",
+      "default": false,
+      "info": "Pause the marquee animation when users hover over or touch the gallery"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_hover_effects",
+      "label": "Enable Hover Effects",
+      "default": false,
+      "info": "Show scale and brightness effects when hovering over images"
     },
     {
       "type": "header",
