@@ -38,6 +38,12 @@
           assign swatch_count = product_option.values | map: 'swatch' | compact | size
           assign variant_style = block_settings.variant_style
 
+          if block_settings.enable_custom_settings and product_option.name == block_settings.canvas_format_name
+            assign is_enabled_canvas_options_style = true
+          else
+            assign is_enabled_canvas_options_style = false
+          endif
+
           if swatch_count > 0 and block_settings.show_swatches
             if block_settings.variant_style == 'dropdown'
               assign variant_style = 'swatch_dropdown'
@@ -55,7 +61,7 @@
 
         {%- if variant_style == 'swatch' or block_settings.variant_style == 'buttons' -%}
           <fieldset
-            class="variant-option variant-option--buttons{% if variant_style == 'swatch' %} variant-option--swatches{% else %} variant-option--{{ settings.variant_button_width }}{% endif %}"
+            class="variant-option variant-option--buttons{% if variant_style == 'swatch' %} variant-option--swatches{% elsif is_enabled_canvas_options_style %} variant-option--canvas-options{% else %} variant-option--{{ settings.variant_button_width }}{% endif %}"
             {{ option_id_attribute }}
             data-option-name="{{ product_option.name | escape | handleize }}"
           >
@@ -109,7 +115,7 @@
                 {% else %}
                   <div class="variant-option__button-label__content">
                     {% comment %}Display canvas format icon and content in two-column layout{% endcomment %}
-                    {% if block_settings.enable_custom_settings and product_option.name == block_settings.canvas_format_name %}
+                    {% if is_enabled_canvas_options_style %}
                       <div class="variant-option__canvas-layout">
                         {% if product_option_value.name == block_settings.rolled_canvas_format_value and block_settings.rolled_canvas_format_icon %}
                           <img src="{{ block_settings.rolled_canvas_format_icon | image_url }}" class="variant-option__icon" alt="Rolled canvas format" width="48" height="48">
@@ -355,6 +361,19 @@
       min-width: var(--variant-min-width);
     }
 
+    .variant-option__button-label__text {
+      text-align: center;
+      text-wrap: balance;
+    }
+  }
+
+  /* Special case for canvas options */
+  .variant-option--canvas-options {
+    --variant-min-width: clamp(150px, calc(var(--variant-option-padding-inline) * 2 + var(--variant-ch)), 100%);
+    display: grid;
+    .variant-option__button-label {
+      min-width: var(--variant-min-width);
+    }
     .variant-option__button-label__text {
       text-align: center;
       text-wrap: balance;
@@ -688,7 +707,6 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: var(--gap-2xs);
     width: 100%;
     text-align: center;
   }
