@@ -68,8 +68,13 @@
     ],
     "buy_x_get_y_progress_bar_fill": "#00ddcf",
     "buy_x_get_y_icon_active_background": "#00b9dd",
-    "cart_upsell_source": "collection",
-    "cart_upsell_collection": "cart-upsell-products",
+    "cart_upsell_source": "products",
+    "cart_upsell_collection": "",
+    "cart_upsell_products": [
+      "bangle-bracelet",
+      "antique-drawers"
+    ],
+    "show_payment_icons": true,
     "drawer_drop_shadow": true,
     "icon_stroke": "default",
     "input_border_width": 1,
