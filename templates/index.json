@@ -484,9 +484,12 @@
         "description_font_size": 16,
         "description_color": "#555555",
         "text_align": "center",
-        "image_height": 120,
+        "image_height": 270,
+        "image_height_mobile": 140,
         "image_rows": 2,
         "scroll_speed": 55,
+        "pause_on_hover": false,
+        "enable_hover_effects": false,
         "padding-block-start": 5,
         "padding-block-end": 5
       }
