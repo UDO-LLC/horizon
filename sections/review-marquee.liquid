@@ -12,11 +12,11 @@
   assign scroll_speed = section.settings.scroll_speed | default: 50
   assign pause_on_hover = section.settings.pause_on_hover
   assign enable_hover_effects = section.settings.enable_hover_effects
-  
+
   # Get all valid image blocks
   assign image_blocks = section.blocks | where: 'type', 'review_image'
   assign total_images = image_blocks.size
-  
+
   # Calculate images per row with better distribution
   assign images_per_row = total_images | divided_by: image_rows | at_least: 1
   assign remainder = total_images | modulo: image_rows
@@ -27,7 +27,7 @@
     {% if header_content != blank or description_content != blank %}
       <div class="review-marquee__header" style="text-align: {{ text_align }};">
         {% if header_content != blank %}
-          <div 
+          <div
             class="review-marquee__header-content"
             style="
               font-size: {{ header_font_size }}px;
@@ -37,30 +37,43 @@
             {{ header_content }}
           </div>
         {% endif %}
-        
-         {% if description_content != blank %}
-           <div 
-             class="review-marquee__description review-marquee__description--{{ text_align }}"
-             style="
-               font-size: {{ description_font_size }}px;
-               color: {{ description_color }};
-             "
-           >
-             {{ description_content }}
-           </div>
-         {% endif %}
+
+        {% if description_content != blank %}
+          <div
+            class="review-marquee__description review-marquee__description--{{ text_align }}"
+            style="
+              font-size: {{ description_font_size }}px;
+              color: {{ description_color }};
+            "
+          >
+            {{ description_content }}
+          </div>
+        {% endif %}
       </div>
     {% endif %}
 
     {% if total_images > 0 %}
-      <div class="review-marquee__gallery" role="region" aria-label="Customer review images" {% if pause_on_hover %}data-pause-on-hover="true"{% endif %} {% if enable_hover_effects %}data-hover-effects="true"{% endif %}>
+      <div
+        class="review-marquee__gallery"
+        role="region"
+        aria-label="Customer review images"
+        {% if pause_on_hover %}
+          data-pause-on-hover="true"
+        {% endif %}
+        {% if enable_hover_effects %}
+          data-hover-effects="true"
+        {% endif %}
+        {% if section.settings.debug_mode %}
+          data-debug-mode="true"
+        {% endif %}
+      >
         {% for row_index in (1..image_rows) %}
           {% liquid
             assign base_images = images_per_row
             if row_index <= remainder
               assign base_images = images_per_row | plus: 1
             endif
-            
+
             # Calculate start and end indices for this row
             assign start_index = 0
             for i in (1..row_index)
@@ -74,9 +87,12 @@
             endfor
             assign end_index = start_index | plus: base_images | minus: 1
           %}
-          
+
           <div class="review-marquee__row">
-             <div class="review-marquee__scroll-container" style="--scroll-speed: {{ scroll_speed }}s; --image-height: {{ image_height }}px; --image-height-mobile: {{ image_height_mobile }}px;">
+            <div
+              class="review-marquee__scroll-container"
+              style="--scroll-speed: {{ scroll_speed }}s; --image-height: {{ image_height }}px; --image-height-mobile: {{ image_height_mobile }}px;"
+            >
               <div class="review-marquee__scroll-content" data-marquee-row="{{ row_index }}">
                 {% for block_index in (start_index..end_index) %}
                   {% assign block = image_blocks[block_index] %}
@@ -215,11 +231,13 @@
   }
 
   /* Disable hover effects when not enabled */
-  .review-marquee__gallery:not([data-hover-effects="true"]) .review-marquee__image-wrapper:hover {
+  .review-marquee__gallery:not([data-hover-effects='true']) .review-marquee__image-wrapper:hover {
     transform: none;
   }
 
-  .review-marquee__gallery:not([data-hover-effects="true"]) .review-marquee__image-wrapper:hover .review-marquee__image {
+  .review-marquee__gallery:not([data-hover-effects='true'])
+    .review-marquee__image-wrapper:hover
+    .review-marquee__image {
     filter: none;
   }
 
@@ -228,7 +246,7 @@
     .review-marquee__image-wrapper {
       padding: 0 0.25rem;
     }
-    
+
     .review-marquee__scroll-content {
       gap: 0.25rem;
     }
@@ -238,11 +256,11 @@
     .review-marquee__scroll-content {
       animation: none;
     }
-    
+
     .review-marquee__image-wrapper:hover {
       transform: none;
     }
-    
+
     .review-marquee__image-wrapper:hover .review-marquee__image {
       filter: none;
     }
@@ -254,93 +272,315 @@
     constructor() {
       this.rows = document.querySelectorAll('.review-marquee__scroll-content');
       this.animations = new Map();
+      this.isInitialized = false;
+      this.debugMode = false; // Will be set from schema setting
+      this.debugPanel = null;
+      this.hasTouchEvents = false;
+      this.lastResizeTime = 0;
+      this.lastScrollTime = 0;
+      this.animationRestartCount = 0;
+      this.touchEventCount = 0;
+      this.scrollEventCount = 0;
+      this.lastViewportSize = { width: window.innerWidth, height: window.innerHeight };
       this.init();
     }
 
     init() {
-      this.rows.forEach(row => {
+      if (this.isInitialized) return;
+
+      this.rows.forEach((row) => {
         this.setupMarquee(row);
       });
-      
+
       // Add pause on hover functionality
       this.setupPauseOnHover();
+
+      this.isInitialized = true;
+
+      // Initialize debug mode from data attribute
+      this.initDebugMode();
     }
 
     setupMarquee(row) {
       const container = row.closest('.review-marquee__scroll-container');
       const scrollSpeed = parseFloat(getComputedStyle(container).getPropertyValue('--scroll-speed')) || 30;
-      
+
       // Calculate the total width of all images
       const totalWidth = row.scrollWidth;
       const containerWidth = container.clientWidth;
-      
+
       // Only animate if content is wider than container
       if (totalWidth <= containerWidth) return;
-      
+
       // Calculate the distance to scroll (total width minus container width)
       const scrollDistance = totalWidth - containerWidth;
-      
+
       // Create keyframes dynamically
-      const keyframes = [
-        { transform: 'translateX(0)' },
-        { transform: `translateX(-${scrollDistance}px)` }
-      ];
-      
+      const keyframes = [{ transform: 'translateX(0)' }, { transform: `translateX(-${scrollDistance}px)` }];
+
       const options = {
         duration: scrollSpeed * 1000,
         easing: 'linear',
-        iterations: Infinity
+        iterations: Infinity,
       };
-      
+
       // Apply animation and store reference
       const animation = row.animate(keyframes, options);
       this.animations.set(row, animation);
+
+      // Store the animation data for potential restart
+      row.dataset.animationData = JSON.stringify({
+        scrollDistance,
+        scrollSpeed,
+        totalWidth,
+        containerWidth,
+      });
+
+      this.updateDebugInfo();
     }
 
     setupPauseOnHover() {
       const gallery = document.querySelector('.review-marquee__gallery');
       if (!gallery || !gallery.hasAttribute('data-pause-on-hover')) return;
 
+      this.hasTouchEvents = true;
+
       gallery.addEventListener('mouseenter', () => {
         this.pauseAll();
+        this.updateDebugInfo();
       });
 
       gallery.addEventListener('mouseleave', () => {
         this.resumeAll();
+        this.updateDebugInfo();
       });
 
       // Pause on touch devices when user touches
-      gallery.addEventListener('touchstart', () => {
+      gallery.addEventListener('touchstart', (e) => {
+        this.touchEventCount++;
         this.pauseAll();
+        this.updateDebugInfo();
       });
 
-      gallery.addEventListener('touchend', () => {
+      gallery.addEventListener('touchend', (e) => {
+        this.touchEventCount++;
         this.resumeAll();
+        this.updateDebugInfo();
       });
     }
 
     pauseAll() {
-      this.animations.forEach(animation => {
+      this.animations.forEach((animation) => {
         animation.pause();
       });
+      this.updateDebugInfo();
     }
 
     resumeAll() {
-      this.animations.forEach(animation => {
+      this.animations.forEach((animation) => {
         animation.play();
       });
+      this.updateDebugInfo();
     }
 
     // Method to handle window resize
     handleResize() {
-      // Clear existing animations
-      this.animations.forEach(animation => {
-        animation.cancel();
+      const currentViewport = { width: window.innerWidth, height: window.innerHeight };
+      const widthDiff = Math.abs(currentViewport.width - this.lastViewportSize.width);
+
+      // Since our marquee animations are horizontal, we only care about width changes
+      // Height changes (like mobile address bar show/hide) don't affect horizontal scrolling
+      const isSignificantWidthChange = widthDiff > 20; // Reduced threshold since we only care about width
+
+      if (isSignificantWidthChange) {
+        this.lastResizeTime = Date.now();
+        this.animationRestartCount++;
+
+        // Check if page is currently scrolling
+        if (window.isPageScrolling) {
+          // Use smooth restart during scroll to prevent flashing
+          this.restartAnimations();
+          return;
+        }
+
+        // Clear existing animations
+        this.animations.forEach((animation) => {
+          animation.cancel();
+        });
+        this.animations.clear();
+
+        // Reset initialization flag
+        this.isInitialized = false;
+
+        // Reinitialize
+        this.init();
+      }
+
+      // Update the last viewport size
+      this.lastViewportSize = currentViewport;
+    }
+
+    // Method to restart animations smoothly
+    restartAnimations() {
+      this.animationRestartCount++;
+      this.animations.forEach((animation, row) => {
+        // Get stored animation data
+        const animationData = row.dataset.animationData;
+        if (!animationData) return;
+
+        try {
+          const data = JSON.parse(animationData);
+
+          // Check if the animation data is still valid
+          const currentTotalWidth = row.scrollWidth;
+          const currentContainerWidth = row.closest('.review-marquee__scroll-container')?.clientWidth;
+
+          if (currentTotalWidth === data.totalWidth && currentContainerWidth === data.containerWidth) {
+            // Animation data is still valid, just restart from current position
+            animation.currentTime = 0;
+          } else {
+            // Animation data is outdated, recreate the animation
+            animation.cancel();
+            this.setupMarquee(row);
+          }
+        } catch (e) {
+          // If there's an error parsing the data, recreate the animation
+          animation.cancel();
+          this.setupMarquee(row);
+        }
       });
-      this.animations.clear();
-      
-      // Reinitialize
-      this.init();
+      this.updateDebugInfo();
+    }
+
+    // Initialize debug mode from schema setting
+    initDebugMode() {
+      const gallery = document.querySelector('.review-marquee__gallery');
+      if (gallery && gallery.hasAttribute('data-debug-mode')) {
+        this.debugMode = true;
+        this.createDebugPanel();
+        this.updateDebugInfo();
+        this.startDebugUpdates();
+      }
+    }
+
+    // Create debug panel
+    createDebugPanel() {
+      if (!this.debugMode) return;
+
+      this.debugPanel = document.createElement('div');
+      this.debugPanel.style.cssText = `
+         position: fixed;
+         top: 10px;
+         left: 10px;
+         background: rgba(0, 0, 0, 0.8);
+         color: white;
+         padding: 10px;
+         border-radius: 5px;
+         font-family: monospace;
+         font-size: 12px;
+         z-index: 9999;
+         max-width: 300px;
+         word-wrap: break-word;
+         cursor: pointer;
+         user-select: none;
+       `;
+
+      // Add click to toggle visibility
+      this.debugPanel.addEventListener('click', () => {
+        this.debugPanel.style.display = this.debugPanel.style.display === 'none' ? 'block' : 'none';
+      });
+
+      document.body.appendChild(this.debugPanel);
+    }
+
+    // Update debug information
+    updateDebugInfo() {
+      if (!this.debugMode || !this.debugPanel) return;
+
+      const info = [];
+      info.push(`📱 MARQUEE DEBUG`);
+      info.push(`Initialized: ${this.isInitialized ? '✅' : '❌'}`);
+      info.push(`Rows: ${this.rows.length}`);
+      info.push(`Animations: ${this.animations.size}`);
+      info.push(`Page Scrolling: ${window.isPageScrolling ? '🔄' : '⏸️'}`);
+
+      // Animation states
+      let runningCount = 0;
+      let pausedCount = 0;
+      let finishedCount = 0;
+
+      this.animations.forEach((animation, row) => {
+        const state = animation.playState;
+        if (state === 'running') runningCount++;
+        else if (state === 'paused') pausedCount++;
+        else if (state === 'finished') finishedCount++;
+      });
+
+      info.push(`Running: ${runningCount}`);
+      info.push(`Paused: ${pausedCount}`);
+      info.push(`Finished: ${finishedCount}`);
+
+      // Event counters
+      info.push(`Touch Events: ${this.touchEventCount}`);
+      info.push(`Scroll Events: ${this.scrollEventCount}`);
+      info.push(`Restarts: ${this.animationRestartCount}`);
+
+      // Timing information
+      const now = Date.now();
+      const timeSinceResize = this.lastResizeTime ? Math.round((now - this.lastResizeTime) / 1000) : 0;
+      const timeSinceScroll = this.lastScrollTime ? Math.round((now - this.lastScrollTime) / 1000) : 0;
+
+      info.push(`Last Resize: ${timeSinceResize}s ago`);
+      info.push(`Last Scroll: ${timeSinceScroll}s ago`);
+
+      // Viewport change tracking (only width matters for horizontal marquee)
+      const currentViewport = { width: window.innerWidth, height: window.innerHeight };
+      const widthDiff = Math.abs(currentViewport.width - this.lastViewportSize.width);
+      const heightDiff = Math.abs(currentViewport.height - this.lastViewportSize.height);
+      info.push(`Width Δ: ${widthDiff}px (${widthDiff > 20 ? '⚠️' : '✅'})`);
+      info.push(`Height Δ: ${heightDiff}px (ignored)`);
+
+      // Device detection
+      const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+      const hasTouch = 'ontouchstart' in window;
+      info.push(`Device: ${isMobile ? '📱 Mobile' : '💻 Desktop'}`);
+      info.push(`Touch Support: ${hasTouch ? '✅' : '❌'}`);
+
+      // Viewport information
+      info.push(`Viewport: ${window.innerWidth}x${window.innerHeight}`);
+
+      // Animation details (first animation only)
+      if (this.animations.size > 0) {
+        const firstAnimation = this.animations.values().next().value;
+        const firstRow = this.animations.keys().next().value;
+        if (firstAnimation && firstRow) {
+          const data = firstRow.dataset.animationData;
+          if (data) {
+            try {
+              const animData = JSON.parse(data);
+              info.push(`Speed: ${animData.scrollSpeed}s`);
+              info.push(`Distance: ${animData.scrollDistance}px`);
+            } catch (e) {
+              info.push(`Speed: Error`);
+            }
+          }
+        }
+      }
+
+      // Add timestamp
+      const timeNow = new Date();
+      info.push(`Time: ${timeNow.getHours()}:${timeNow.getMinutes()}:${timeNow.getSeconds()}`);
+
+      this.debugPanel.innerHTML = info.join('<br>');
+    }
+
+    // Start periodic debug updates
+    startDebugUpdates() {
+      if (!this.debugMode) return;
+
+      setInterval(() => {
+        this.updateDebugInfo();
+      }, 1000); // Update every second
     }
   }
 
@@ -364,6 +604,32 @@
       }
     }, 250);
   });
+
+  // Prevent animation restarts during page scroll
+  window.isPageScrolling = false;
+  let scrollTimeout;
+
+  window.addEventListener(
+    'scroll',
+    () => {
+      window.isPageScrolling = true;
+
+      if (marquee) {
+        marquee.lastScrollTime = Date.now();
+        marquee.scrollEventCount++;
+      }
+
+      if (scrollTimeout) {
+        clearTimeout(scrollTimeout);
+      }
+
+      // Reset scroll detection after scrolling stops
+      scrollTimeout = setTimeout(() => {
+        window.isPageScrolling = false;
+      }, 150);
+    },
+    { passive: true }
+  );
 {% endjavascript %}
 
 {% schema %}
@@ -537,6 +803,17 @@
       "step": 1,
       "unit": "px",
       "default": 40
+    },
+    {
+      "type": "header",
+      "content": "Debug Mode - Development Only"
+    },
+    {
+      "type": "checkbox",
+      "id": "debug_mode",
+      "label": "Enable Debug Mode",
+      "default": false,
+      "info": "Show debug information panel for troubleshooting (development only)"
     }
   ],
   "presets": [
