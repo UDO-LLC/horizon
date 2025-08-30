@@ -2027,6 +2027,150 @@
       },
       {
         "type": "header",
+        "content": "t:content.typography"
+      },
+      {
+        "type": "select",
+        "id": "cart_upsell_heading_font_size",
+        "label": "t:settings.cart_upsell_heading_font_size",
+        "options": [
+          {
+            "value": "12",
+            "label": "12px"
+          },
+          {
+            "value": "14",
+            "label": "14px"
+          },
+          {
+            "value": "16",
+            "label": "16px"
+          },
+          {
+            "value": "18",
+            "label": "18px"
+          },
+          {
+            "value": "20",
+            "label": "20px"
+          },
+          {
+            "value": "24",
+            "label": "24px"
+          },
+          {
+            "value": "28",
+            "label": "28px"
+          },
+          {
+            "value": "32",
+            "label": "32px"
+          }
+        ],
+        "default": "20"
+      },
+      {
+        "type": "select",
+        "id": "cart_upsell_title_font_size",
+        "label": "t:settings.cart_upsell_title_font_size",
+        "options": [
+          {
+            "value": "10",
+            "label": "10px"
+          },
+          {
+            "value": "12",
+            "label": "12px"
+          },
+          {
+            "value": "14",
+            "label": "14px"
+          },
+          {
+            "value": "16",
+            "label": "16px"
+          },
+          {
+            "value": "18",
+            "label": "18px"
+          },
+          {
+            "value": "20",
+            "label": "20px"
+          },
+          {
+            "value": "24",
+            "label": "24px"
+          }
+        ],
+        "default": "14"
+      },
+      {
+        "type": "select",
+        "id": "cart_upsell_description_font_size",
+        "label": "t:settings.cart_upsell_description_font_size",
+        "options": [
+          {
+            "value": "10",
+            "label": "10px"
+          },
+          {
+            "value": "12",
+            "label": "12px"
+          },
+          {
+            "value": "14",
+            "label": "14px"
+          },
+          {
+            "value": "16",
+            "label": "16px"
+          },
+          {
+            "value": "18",
+            "label": "18px"
+          }
+        ],
+        "default": "12"
+      },
+      {
+        "type": "select",
+        "id": "cart_upsell_price_font_size",
+        "label": "t:settings.cart_upsell_price_font_size",
+        "options": [
+          {
+            "value": "10",
+            "label": "10px"
+          },
+          {
+            "value": "12",
+            "label": "12px"
+          },
+          {
+            "value": "14",
+            "label": "14px"
+          },
+          {
+            "value": "16",
+            "label": "16px"
+          },
+          {
+            "value": "18",
+            "label": "18px"
+          },
+          {
+            "value": "20",
+            "label": "20px"
+          },
+          {
+            "value": "24",
+            "label": "24px"
+          }
+        ],
+        "default": "16"
+      },
+      {
+        "type": "header",
         "content": "t:content.cart_summary"
       },
       {

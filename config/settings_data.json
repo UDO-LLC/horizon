@@ -74,6 +74,10 @@
       "bangle-bracelet",
       "antique-drawers"
     ],
+    "cart_upsell_heading_font_size": "20",
+    "cart_upsell_title_font_size": "14",
+    "cart_upsell_description_font_size": "12",
+    "cart_upsell_price_font_size": "16",
     "show_payment_icons": true,
     "drawer_drop_shadow": true,
     "icon_stroke": "default",
