@@ -190,7 +190,8 @@
                 "landscape_orientation_selector_string": "fieldset.variant-option[data-option-name=\"orientation\"] input[type=\"radio\"][data-handle=\"landscape\"]",
                 "preview_palette_colors_container_selector_string": "form.variant-picker__form",
                 "preview_palette_colors_button_position": "static",
-                "debug_mode": true
+                "debug_mode": true,
+                "debug_wonder_kit_mode": true
               }
             },
             "variant_picker_R3rGDr": {
@@ -260,7 +261,8 @@
                   "type": "add-to-cart",
                   "static": true,
                   "settings": {
-                    "style_class": "button"
+                    "style_class": "button",
+                    "should_show_price_in_add_to_cart_button": true
                   },
                   "blocks": {}
                 },
