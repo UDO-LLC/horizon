@@ -63,29 +63,20 @@
         {% if enable_hover_effects %}
           data-hover-effects="true"
         {% endif %}
-        {% if section.settings.debug_mode %}
-          data-debug-mode="true"
-        {% endif %}
       >
         {% for row_index in (1..image_rows) %}
           {% liquid
-            assign base_images = images_per_row
-            if row_index <= remainder
-              assign base_images = images_per_row | plus: 1
-            endif
+            assign images_per_row = total_images | divided_by: image_rows | at_least: 1
+            assign remainder = total_images | modulo: image_rows
 
-            # Calculate start and end indices for this row
-            assign start_index = 0
-            for i in (1..row_index)
-              if i < row_index
-                if i <= remainder
-                  assign start_index = start_index | plus: images_per_row | plus: 1
-                else
-                  assign start_index = start_index | plus: images_per_row
-                endif
-              endif
-            endfor
-            assign end_index = start_index | plus: base_images | minus: 1
+            assign start_index = forloop.index0 | times: images_per_row
+            if forloop.index <= remainder
+              assign start_index = start_index | plus: forloop.index0
+            endif
+            assign end_index = start_index | plus: images_per_row | minus: 1
+            if forloop.index <= remainder
+              assign end_index = end_index | plus: 1
+            endif
           %}
 
           <div class="review-marquee__row">
@@ -272,71 +263,86 @@
     constructor() {
       this.rows = document.querySelectorAll('.review-marquee__scroll-content');
       this.isInitialized = false;
-      this.debugMode = false;
-      this.debugPanel = null;
-      
-      // Simple Safari detection
-      this.isSafari = /Safari/.test(navigator.userAgent) && !/Chrome/.test(navigator.userAgent);
-      
+
+      // Bind methods to prevent memory leaks
+      this.boundMethods = {
+        pauseAll: this.pauseAll.bind(this),
+        resumeAll: this.resumeAll.bind(this),
+        handleResize: this.handleResize.bind(this),
+      };
+
+      // Better Safari detection with feature detection
+      this.isSafari = this.detectSafari();
+
       // Track viewport size for mobile optimization
       this.lastViewportSize = { width: window.innerWidth, height: window.innerHeight };
-      
+
       this.init();
+    }
+
+    detectSafari() {
+      return /Safari/.test(navigator.userAgent) && !/Chrome|Chromium|Edg|OPR/.test(navigator.userAgent);
     }
 
     init() {
       if (this.isInitialized) return;
-      
-      // Initialize debug mode first
-      this.initDebugMode();
-      
-      // Safari-specific: Longer delay to ensure DOM is ready
-      if (this.isSafari) {
-        setTimeout(() => this.setupAnimations(), 200);
-      } else {
-        this.setupAnimations();
+
+      try {
+        // Safari-specific: Longer delay to ensure DOM is ready
+        if (this.isSafari) {
+          setTimeout(() => this.setupAnimations(), 1000);
+        } else {
+          this.setupAnimations();
+        }
+
+        this.isInitialized = true;
+      } catch (error) {
+        this.handleError(error, 'initialization');
       }
-      
-      this.isInitialized = true;
     }
 
     setupAnimations() {
-      this.rows.forEach((row, index) => {
-        this.setupRow(row, index);
-      });
-      
-      this.setupPauseOnHover();
+      try {
+        this.rows.forEach((row, index) => {
+          this.setupRow(row, index);
+        });
+
+        this.setupPauseOnHover();
+      } catch (error) {
+        this.handleError(error, 'animation setup');
+      }
     }
 
     setupRow(row, index) {
-      const container = row.closest('.review-marquee__scroll-container');
-      const scrollSpeed = parseFloat(getComputedStyle(container).getPropertyValue('--scroll-speed')) || 30;
-      
-      // Calculate widths
-      const totalWidth = row.scrollWidth;
-      const containerWidth = container.clientWidth;
-      
-      // Only animate if content is wider than container
-      if (totalWidth <= containerWidth) {
-        return;
-      }
-      
-      const scrollDistance = totalWidth - containerWidth;
-      
-      // Safari-specific: Stagger animation creation to prevent throttling
-      if (this.isSafari && index > 0) {
-        setTimeout(() => {
-          this.createCSSAnimation(row, scrollDistance, scrollSpeed, index);
-        }, index * 100); // 100ms delay between each animation
-      } else {
+      try {
+        const container = row.closest('.review-marquee__scroll-container');
+        if (!container) {
+          console.warn('Container not found for row:', index);
+          return;
+        }
+
+        const scrollSpeed = parseFloat(getComputedStyle(container).getPropertyValue('--scroll-speed')) || 30;
+
+        // Calculate widths
+        const totalWidth = row.scrollWidth;
+        const containerWidth = container.clientWidth;
+
+        // Only animate if content is wider than container
+        if (totalWidth <= containerWidth) {
+          return;
+        }
+
+        const scrollDistance = totalWidth - containerWidth;
         this.createCSSAnimation(row, scrollDistance, scrollSpeed, index);
+      } catch (error) {
+        this.handleError(error, `row setup ${index}`);
       }
     }
 
     createCSSAnimation(row, scrollDistance, scrollSpeed, index) {
       try {
         const animationName = `marquee-${index}-${Date.now()}`;
-        
+
         // Safari-specific: Force hardware acceleration
         if (this.isSafari) {
           row.style.transform = 'translateZ(0)';
@@ -346,7 +352,7 @@
           row.style.backfaceVisibility = 'hidden';
           row.style.webkitBackfaceVisibility = 'hidden';
         }
-        
+
         // Create style element
         const style = document.createElement('style');
         style.textContent = `
@@ -360,271 +366,204 @@
           }
         `;
         document.head.appendChild(style);
-        
+
         // Apply animation
         row.style.animation = `${animationName} ${scrollSpeed}s linear infinite`;
         row.style.webkitAnimation = `${animationName} ${scrollSpeed}s linear infinite`;
-        
+
         // Store reference for cleanup
         row.dataset.animationStyle = style;
         row.dataset.animationName = animationName;
-        
+
         // Force a reflow to ensure animation is applied
         row.offsetHeight;
-        
       } catch (error) {
-        console.error('Error creating CSS animation:', error);
-        
+        this.handleError(error, 'CSS animation creation');
+
         // Fallback: Try inline animation
         try {
           row.style.transition = `transform ${scrollSpeed}s linear infinite`;
           row.style.transform = `translateX(-${scrollDistance}px)`;
-          
+
           // Store fallback info
           row.dataset.animationStyle = 'fallback';
           row.dataset.animationName = 'fallback-inline';
         } catch (fallbackError) {
-          console.error('Fallback animation also failed:', fallbackError);
+          this.handleError(fallbackError, 'fallback animation');
         }
       }
     }
 
     setupPauseOnHover() {
-      const gallery = document.querySelector('.review-marquee__gallery');
-      if (!gallery || !gallery.hasAttribute('data-pause-on-hover')) return;
-      
-      gallery.addEventListener('mouseenter', () => this.pauseAll());
-      gallery.addEventListener('mouseleave', () => this.resumeAll());
-      gallery.addEventListener('touchstart', () => this.pauseAll());
-      gallery.addEventListener('touchend', () => this.resumeAll());
+      try {
+        const gallery = document.querySelector('.review-marquee__gallery');
+        if (!gallery || !gallery.hasAttribute('data-pause-on-hover')) return;
+
+        // Use bound methods to prevent memory leaks
+        gallery.addEventListener('mouseenter', this.boundMethods.pauseAll);
+        gallery.addEventListener('mouseleave', this.boundMethods.resumeAll);
+        gallery.addEventListener('touchstart', this.boundMethods.pauseAll);
+        gallery.addEventListener('touchend', this.boundMethods.resumeAll);
+
+        // Store reference for cleanup
+        this.gallery = gallery;
+      } catch (error) {
+        this.handleError(error, 'hover setup');
+      }
     }
 
     pauseAll() {
-      this.rows.forEach(row => {
-        row.style.animationPlayState = 'paused';
-        row.style.webkitAnimationPlayState = 'paused';
-      });
+      try {
+        this.rows.forEach((row) => {
+          row.style.animationPlayState = 'paused';
+          row.style.webkitAnimationPlayState = 'paused';
+        });
+      } catch (error) {
+        this.handleError(error, 'pause animation');
+      }
     }
 
     resumeAll() {
-      this.rows.forEach(row => {
-        row.style.animationPlayState = 'running';
-        row.style.webkitAnimationPlayState = 'running';
-      });
+      try {
+        this.rows.forEach((row) => {
+          row.style.animationPlayState = 'running';
+          row.style.webkitAnimationPlayState = 'running';
+        });
+      } catch (error) {
+        this.handleError(error, 'resume animation');
+      }
     }
 
-    // Simple resize handler
+    // Optimized resize handler - only restarts animations, not entire component
     handleResize() {
-      const currentViewport = { width: window.innerWidth, height: window.innerHeight };
-      const widthDiff = Math.abs(currentViewport.width - this.lastViewportSize.width);
-      const heightDiff = Math.abs(currentViewport.height - this.lastViewportSize.height);
+      try {
+        const currentViewport = { width: window.innerWidth, height: window.innerHeight };
+        const widthDiff = Math.abs(currentViewport.width - this.lastViewportSize.width);
+        const heightDiff = Math.abs(currentViewport.height - this.lastViewportSize.height);
 
-      // Only restart animations on significant width changes
-      // Ignore height changes (like mobile address bar show/hide)
-      const isSignificantWidthChange = widthDiff > 20;
-      const isOnlyHeightChange = widthDiff <= 5 && heightDiff > 20;
+        // Only restart animations on significant width changes
+        // Ignore height changes (like mobile address bar show/hide)
+        const isSignificantWidthChange = widthDiff > 20;
+        const isOnlyHeightChange = widthDiff <= 5 && heightDiff > 20;
 
-      if (isSignificantWidthChange && !isOnlyHeightChange) {
+        if (isSignificantWidthChange && !isOnlyHeightChange) {
+          // Only restart animations, not entire component
+          this.restartAnimations();
+        }
+
+        // Update the last viewport size
+        this.lastViewportSize = currentViewport;
+      } catch (error) {
+        this.handleError(error, 'resize handling');
+      }
+    }
+
+    restartAnimations() {
+      try {
         // Clear existing animations
         this.clearAnimations();
-        
-        // Reinitialize
-        this.isInitialized = false;
-        this.init();
-      }
 
-      // Update the last viewport size
-      this.lastViewportSize = currentViewport;
+        // Re-setup animations without reinitializing component
+        this.setupAnimations();
+      } catch (error) {
+        this.handleError(error, 'animation restart');
+      }
     }
 
     clearAnimations() {
-      this.rows.forEach(row => {
-        // Remove animation
-        row.style.animation = '';
-        row.style.webkitAnimation = '';
-        
-        // Remove style element
-        const style = row.dataset.animationStyle;
-        if (style && style.parentNode) {
-          style.parentNode.removeChild(style);
+      try {
+        this.rows.forEach((row) => {
+          // Remove animation
+          row.style.animation = '';
+          row.style.webkitAnimation = '';
+
+          // Remove style element
+          const style = row.dataset.animationStyle;
+          if (style && style.parentNode && typeof style === 'object') {
+            style.parentNode.removeChild(style);
+          }
+
+          // Clear data
+          delete row.dataset.animationStyle;
+          delete row.dataset.animationName;
+        });
+      } catch (error) {
+        this.handleError(error, 'animation cleanup');
+      }
+    }
+
+    // Better error handling with user feedback
+    handleError(error, context) {
+      console.error(`Marquee error in ${context}:`, error);
+    }
+
+    // Comprehensive cleanup method
+    cleanup() {
+      try {
+        // Clear animations
+        this.clearAnimations();
+
+        // Remove event listeners
+        if (this.gallery) {
+          this.gallery.removeEventListener('mouseenter', this.boundMethods.pauseAll);
+          this.gallery.removeEventListener('mouseleave', this.boundMethods.resumeAll);
+          this.gallery.removeEventListener('touchstart', this.boundMethods.pauseAll);
+          this.gallery.removeEventListener('touchend', this.boundMethods.resumeAll);
         }
-        
-        // Clear data
-        delete row.dataset.animationStyle;
-        delete row.dataset.animationName;
-      });
-    }
 
-    // Debug functionality
-    initDebugMode() {
-      const gallery = document.querySelector('.review-marquee__gallery');
-      if (gallery && gallery.hasAttribute('data-debug-mode')) {
-        this.debugMode = true;
-        this.createDebugPanel();
-        this.updateDebugInfo();
-        this.startDebugUpdates();
+        // Clear bound methods
+        this.boundMethods = null;
+
+        // Reset state
+        this.isInitialized = false;
+        this.gallery = null;
+      } catch (error) {
+        console.error('Error during cleanup:', error);
       }
     }
 
-    createDebugPanel() {
-      this.debugPanel = document.createElement('div');
-      this.debugPanel.style.cssText = `
-        position: fixed;
-        top: 10px;
-        left: 10px;
-        background: rgba(0, 0, 0, 0.9);
-        color: white;
-        padding: 15px;
-        border-radius: 8px;
-        font-family: monospace;
-        font-size: 12px;
-        z-index: 9999;
-        max-width: 350px;
-        word-wrap: break-word;
-        cursor: pointer;
-        user-select: none;
-        border: 2px solid #333;
-      `;
-
-      this.debugPanel.addEventListener('click', () => {
-        this.debugPanel.style.display = this.debugPanel.style.display === 'none' ? 'block' : 'none';
-      });
-
-      document.body.appendChild(this.debugPanel);
-    }
-
-    updateDebugInfo() {
-      if (!this.debugMode || !this.debugPanel) return;
-
-      const info = [];
-      info.push(`🎯 SIMPLE MARQUEE DEBUG`);
-      info.push(`Initialized: ${this.isInitialized ? '✅' : '❌'}`);
-      info.push(`Safari: ${this.isSafari ? '✅' : '❌'}`);
-      info.push(`Rows: ${this.rows.length}`);
-      
-      // Animation status
-      let animatedRows = 0;
-      let pausedRows = 0;
-      
-      this.rows.forEach((row, index) => {
-        const hasAnimation = row.style.animation || row.style.webkitAnimation;
-        const isPaused = row.style.animationPlayState === 'paused' || row.style.webkitAnimationPlayState === 'paused';
-        
-        if (hasAnimation) {
-          animatedRows++;
-          if (isPaused) pausedRows++;
-        }
-      });
-      
-      info.push(`Animated: ${animatedRows}/${this.rows.length}`);
-      info.push(`Paused: ${pausedRows}`);
-      
-      // Browser info
-      const userAgent = navigator.userAgent;
-      const browser = this.getBrowserInfo(userAgent);
-      info.push(`Browser: ${browser.name} ${browser.version}`);
-      info.push(`OS: ${browser.os}`);
-      info.push(`Mobile: ${browser.isMobile ? '✅' : '❌'}`);
-      
-      // Performance
-      info.push(`FPS: ${this.getFPS()}`);
-      
-      // Row details
-      this.rows.forEach((row, index) => {
-        const container = row.closest('.review-marquee__scroll-container');
-        const totalWidth = row.scrollWidth;
-        const containerWidth = container?.clientWidth || 0;
-        const hasAnimation = row.style.animation || row.style.webkitAnimation;
-        const animationName = row.dataset.animationName;
-        
-        info.push(`Row ${index + 1}: ${totalWidth}px/${containerWidth}px ${hasAnimation ? '✅' : '❌'} ${animationName ? `(${animationName})` : ''}`);
-      });
-      
-      // Timestamp
-      const now = new Date();
-      info.push(`Time: ${now.getHours()}:${now.getMinutes()}:${now.getSeconds()}`);
-
-      this.debugPanel.innerHTML = info.join('<br>');
-    }
-
-    getBrowserInfo(userAgent) {
-      let browser = 'Unknown';
-      let version = 'Unknown';
-      let os = 'Unknown';
-      let isMobile = false;
-
-      isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(userAgent);
-
-      if (userAgent.includes('Chrome') && !userAgent.includes('Edg')) {
-        browser = 'Chrome';
-        const match = userAgent.match(/Chrome\/(\d+)/);
-        version = match ? match[1] : 'Unknown';
-      } else if (userAgent.includes('Safari') && !userAgent.includes('Chrome')) {
-        browser = 'Safari';
-        const match = userAgent.match(/Version\/(\d+)/);
-        version = match ? match[1] : 'Unknown';
-      } else if (userAgent.includes('Firefox')) {
-        browser = 'Firefox';
-        const match = userAgent.match(/Firefox\/(\d+)/);
-        version = match ? match[1] : 'Unknown';
-      } else if (userAgent.includes('Edg')) {
-        browser = 'Edge';
-        const match = userAgent.match(/Edg\/(\d+)/);
-        version = match ? match[1] : 'Unknown';
-      }
-
-      if (userAgent.includes('Windows')) os = 'Windows';
-      else if (userAgent.includes('Mac')) os = 'macOS';
-      else if (userAgent.includes('Linux')) os = 'Linux';
-      else if (userAgent.includes('Android')) os = 'Android';
-      else if (userAgent.includes('iOS')) os = 'iOS';
-
-      return { name: browser, version, os, isMobile };
-    }
-
-    getFPS() {
-      if (!this.frameCount) {
-        this.frameCount = 0;
-        this.lastFPSUpdate = Date.now();
-      }
-
-      this.frameCount++;
-      const now = Date.now();
-      
-      if (now - this.lastFPSUpdate >= 1000) {
-        this.currentFPS = this.frameCount;
-        this.frameCount = 0;
-        this.lastFPSUpdate = now;
-      }
-
-      return this.currentFPS || 'Calculating...';
-    }
-
-    startDebugUpdates() {
-      if (!this.debugMode) return;
-      setInterval(() => this.updateDebugInfo(), 1000);
+    // Public destroy method
+    destroy() {
+      this.cleanup();
     }
   }
 
-  // Initialize
+  // Initialize with proper error handling
   let marquee;
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', () => {
+
+  const initializeMarquee = () => {
+    try {
       marquee = new ReviewMarquee();
-    });
+    } catch (error) {
+      console.error('Failed to initialize ReviewMarquee:', error);
+    }
+  };
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initializeMarquee);
   } else {
-    marquee = new ReviewMarquee();
+    initializeMarquee();
   }
 
-  // Simple resize handler
+  // Optimized resize handler with proper cleanup
   let resizeTimeout;
-  window.addEventListener('resize', () => {
+  const handleResize = () => {
     clearTimeout(resizeTimeout);
     resizeTimeout = setTimeout(() => {
-      if (marquee) {
-        marquee.handleResize();
+      if (marquee && marquee.isInitialized) {
+        marquee.boundMethods.handleResize();
       }
     }, 250);
+  };
+
+  window.addEventListener('resize', handleResize);
+
+  // Cleanup on page unload
+  window.addEventListener('beforeunload', () => {
+    if (marquee) {
+      marquee.cleanup();
+    }
+    window.removeEventListener('resize', handleResize);
   });
 {% endjavascript %}
 
@@ -799,17 +738,6 @@
       "step": 1,
       "unit": "px",
       "default": 40
-    },
-    {
-      "type": "header",
-      "content": "Debug Mode - Development Only"
-    },
-    {
-      "type": "checkbox",
-      "id": "debug_mode",
-      "label": "Enable Debug Mode",
-      "default": false,
-      "info": "Show debug information panel for troubleshooting (development only)"
     }
   ],
   "presets": [
