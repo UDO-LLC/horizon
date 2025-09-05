@@ -185,6 +185,34 @@
     display: flex;
     width: fit-content;
     gap: 0.5rem;
+    will-change: transform;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+  }
+
+  /* Dynamic animation will be applied via JavaScript */
+  .review-marquee__scroll-content.animated {
+    animation: marquee-scroll-dynamic var(--scroll-speed, 50s) linear infinite;
+  }
+
+  /* Keyframe animation for dynamic scrolling */
+  @keyframes marquee-scroll-dynamic {
+    0% {
+      transform: translate3d(0, 0, 0);
+    }
+    100% {
+      transform: translate3d(var(--scroll-distance, -100%), 0, 0);
+    }
+  }
+
+  /* Webkit prefix for better Safari support */
+  @-webkit-keyframes marquee-scroll-dynamic {
+    0% {
+      -webkit-transform: translate3d(0, 0, 0);
+    }
+    100% {
+      -webkit-transform: translate3d(var(--scroll-distance, -100%), 0, 0);
+    }
   }
 
   .review-marquee__image-wrapper {
@@ -256,11 +284,20 @@
       filter: none;
     }
   }
+
+  /* Fallback for browsers that don't support CSS animations */
+  @supports not (animation: marquee-scroll 1s linear infinite) {
+    .review-marquee__scroll-content {
+      animation: none;
+    }
+  }
 {% endstylesheet %}
+
 
 {% javascript %}
   class ReviewMarquee {
     constructor() {
+      this.gallery = document.querySelector('.review-marquee__gallery');
       this.rows = document.querySelectorAll('.review-marquee__scroll-content');
       this.isInitialized = false;
 
@@ -268,263 +305,115 @@
       this.boundMethods = {
         pauseAll: this.pauseAll.bind(this),
         resumeAll: this.resumeAll.bind(this),
-        handleResize: this.handleResize.bind(this),
+        recalculate: this.recalculate.bind(this),
       };
 
-      // Better Safari detection with feature detection
-      this.isSafari = this.detectSafari();
-
-      // Track viewport size for mobile optimization
-      this.lastViewportSize = { width: window.innerWidth, height: window.innerHeight };
-
       this.init();
-    }
-
-    detectSafari() {
-      return /Safari/.test(navigator.userAgent) && !/Chrome|Chromium|Edg|OPR/.test(navigator.userAgent);
     }
 
     init() {
       if (this.isInitialized) return;
 
       try {
-        // Safari-specific: Longer delay to ensure DOM is ready
-        if (this.isSafari) {
-          setTimeout(() => this.setupAnimations(), 1000);
-        } else {
-          this.setupAnimations();
-        }
-
-        this.isInitialized = true;
-      } catch (error) {
-        this.handleError(error, 'initialization');
-      }
-    }
-
-    setupAnimations() {
-      try {
-        this.rows.forEach((row, index) => {
-          this.setupRow(row, index);
+        // Wait for images to load before calculating dimensions
+        this.waitForImages().then(() => {
+          this.setupMarqueeAnimations();
+          this.setupPauseOnHover();
+          this.setupHoverEffects();
+          this.isInitialized = true;
         });
-
-        this.setupPauseOnHover();
       } catch (error) {
-        this.handleError(error, 'animation setup');
+        console.error('Marquee initialization error:', error);
       }
     }
 
-    setupRow(row, index) {
-      try {
-        const container = row.closest('.review-marquee__scroll-container');
-        if (!container) {
-          console.warn('Container not found for row:', index);
+    waitForImages() {
+      return new Promise((resolve) => {
+        const images = document.querySelectorAll('.review-marquee__image');
+        let loadedCount = 0;
+        const totalImages = images.length;
+
+        if (totalImages === 0) {
+          resolve();
           return;
         }
 
-        const scrollSpeed = parseFloat(getComputedStyle(container).getPropertyValue('--scroll-speed')) || 30;
+        const onImageLoad = () => {
+          loadedCount++;
+          if (loadedCount === totalImages) {
+            resolve();
+          }
+        };
 
-        // Calculate widths
-        const totalWidth = row.scrollWidth;
-        const containerWidth = container.clientWidth;
-
-        // Only animate if content is wider than container
-        if (totalWidth <= containerWidth) {
-          return;
-        }
-
-        const scrollDistance = totalWidth - containerWidth;
-        this.createCSSAnimation(row, scrollDistance, scrollSpeed, index);
-      } catch (error) {
-        this.handleError(error, `row setup ${index}`);
-      }
+        images.forEach((img) => {
+          if (img.complete) {
+            onImageLoad();
+          } else {
+            img.addEventListener('load', onImageLoad);
+            img.addEventListener('error', onImageLoad); // Count errors as loaded
+          }
+        });
+      });
     }
 
-    createCSSAnimation(row, scrollDistance, scrollSpeed, index) {
-      try {
-        const animationName = `marquee-${index}-${Date.now()}`;
+    setupMarqueeAnimations() {
+      this.rows.forEach((content) => {
+        this.calculateAndApplyAnimation(content);
+      });
+    }
 
-        // Safari-specific: Force hardware acceleration
-        if (this.isSafari) {
-          row.style.transform = 'translateZ(0)';
-          row.style.webkitTransform = 'translateZ(0)';
-          row.style.willChange = 'transform';
-          row.style.webkitWillChange = 'transform';
-          row.style.backfaceVisibility = 'hidden';
-          row.style.webkitBackfaceVisibility = 'hidden';
-        }
-
-        // Create style element
-        const style = document.createElement('style');
-        style.textContent = `
-          @keyframes ${animationName} {
-            0% { transform: translateX(0); }
-            100% { transform: translateX(-${scrollDistance}px); }
-          }
-          @-webkit-keyframes ${animationName} {
-            0% { -webkit-transform: translateX(0); }
-            100% { -webkit-transform: translateX(-${scrollDistance}px); }
-          }
-        `;
-        document.head.appendChild(style);
-
-        // Apply animation
-        row.style.animation = `${animationName} ${scrollSpeed}s linear infinite`;
-        row.style.webkitAnimation = `${animationName} ${scrollSpeed}s linear infinite`;
-
-        // Store reference for cleanup
-        row.dataset.animationStyle = style;
-        row.dataset.animationName = animationName;
-
-        // Force a reflow to ensure animation is applied
-        row.offsetHeight;
-      } catch (error) {
-        this.handleError(error, 'CSS animation creation');
-
-        // Fallback: Try inline animation
-        try {
-          row.style.transition = `transform ${scrollSpeed}s linear infinite`;
-          row.style.transform = `translateX(-${scrollDistance}px)`;
-
-          // Store fallback info
-          row.dataset.animationStyle = 'fallback';
-          row.dataset.animationName = 'fallback-inline';
-        } catch (fallbackError) {
-          this.handleError(fallbackError, 'fallback animation');
-        }
-      }
+    calculateAndApplyAnimation(content) {
+      
+      // Get the content width
+      const contentWidth = content.scrollWidth;
+      
+      const scrollDistance = contentWidth - window.innerWidth;
+      
+      // Set CSS custom property for the scroll distance
+      content.style.setProperty('--scroll-distance', `-${scrollDistance}px`);
+      
+      // Add the animated class to start the animation
+      content.classList.add('animated');
     }
 
     setupPauseOnHover() {
-      try {
-        const gallery = document.querySelector('.review-marquee__gallery');
-        if (!gallery || !gallery.hasAttribute('data-pause-on-hover')) return;
+      if (!this.gallery || !this.gallery.hasAttribute('data-pause-on-hover')) return;
 
-        // Use bound methods to prevent memory leaks
-        gallery.addEventListener('mouseenter', this.boundMethods.pauseAll);
-        gallery.addEventListener('mouseleave', this.boundMethods.resumeAll);
-        gallery.addEventListener('touchstart', this.boundMethods.pauseAll);
-        gallery.addEventListener('touchend', this.boundMethods.resumeAll);
-
-        // Store reference for cleanup
-        this.gallery = gallery;
-      } catch (error) {
-        this.handleError(error, 'hover setup');
-      }
+      // Use bound methods to prevent memory leaks
+      this.gallery.addEventListener('mouseenter', this.boundMethods.pauseAll);
+      this.gallery.addEventListener('mouseleave', this.boundMethods.resumeAll);
+      this.gallery.addEventListener('touchstart', this.boundMethods.pauseAll);
+      this.gallery.addEventListener('touchend', this.boundMethods.resumeAll);
     }
 
     pauseAll() {
-      try {
-        this.rows.forEach((row) => {
-          row.style.animationPlayState = 'paused';
-          row.style.webkitAnimationPlayState = 'paused';
-        });
-      } catch (error) {
-        this.handleError(error, 'pause animation');
-      }
+      this.rows.forEach((row) => {
+        row.style.animationPlayState = 'paused';
+      });
     }
 
     resumeAll() {
-      try {
-        this.rows.forEach((row) => {
-          row.style.animationPlayState = 'running';
-          row.style.webkitAnimationPlayState = 'running';
-        });
-      } catch (error) {
-        this.handleError(error, 'resume animation');
-      }
+      this.rows.forEach((row) => {
+        row.style.animationPlayState = 'running';
+      });
     }
 
-    // Optimized resize handler - only restarts animations, not entire component
-    handleResize() {
-      try {
-        const currentViewport = { width: window.innerWidth, height: window.innerHeight };
-        const widthDiff = Math.abs(currentViewport.width - this.lastViewportSize.width);
-        const heightDiff = Math.abs(currentViewport.height - this.lastViewportSize.height);
-
-        // Only restart animations on significant width changes
-        // Ignore height changes (like mobile address bar show/hide)
-        const isSignificantWidthChange = widthDiff > 20;
-        const isOnlyHeightChange = widthDiff <= 5 && heightDiff > 20;
-
-        if (isSignificantWidthChange && !isOnlyHeightChange) {
-          // Only restart animations, not entire component
-          this.restartAnimations();
-        }
-
-        // Update the last viewport size
-        this.lastViewportSize = currentViewport;
-      } catch (error) {
-        this.handleError(error, 'resize handling');
-      }
+    recalculate() {
+      // Recalculate animations for responsive changes
+      this.setupMarqueeAnimations();
     }
 
-    restartAnimations() {
-      try {
-        // Clear existing animations
-        this.clearAnimations();
-
-        // Re-setup animations without reinitializing component
-        this.setupAnimations();
-      } catch (error) {
-        this.handleError(error, 'animation restart');
-      }
-    }
-
-    clearAnimations() {
-      try {
-        this.rows.forEach((row) => {
-          // Remove animation
-          row.style.animation = '';
-          row.style.webkitAnimation = '';
-
-          // Remove style element
-          const style = row.dataset.animationStyle;
-          if (style && style.parentNode && typeof style === 'object') {
-            style.parentNode.removeChild(style);
-          }
-
-          // Clear data
-          delete row.dataset.animationStyle;
-          delete row.dataset.animationName;
-        });
-      } catch (error) {
-        this.handleError(error, 'animation cleanup');
-      }
-    }
-
-    // Better error handling with user feedback
-    handleError(error, context) {
-      console.error(`Marquee error in ${context}:`, error);
-    }
-
-    // Comprehensive cleanup method
+    // Simple cleanup method
     cleanup() {
-      try {
-        // Clear animations
-        this.clearAnimations();
-
-        // Remove event listeners
-        if (this.gallery) {
-          this.gallery.removeEventListener('mouseenter', this.boundMethods.pauseAll);
-          this.gallery.removeEventListener('mouseleave', this.boundMethods.resumeAll);
-          this.gallery.removeEventListener('touchstart', this.boundMethods.pauseAll);
-          this.gallery.removeEventListener('touchend', this.boundMethods.resumeAll);
-        }
-
-        // Clear bound methods
-        this.boundMethods = null;
-
-        // Reset state
-        this.isInitialized = false;
-        this.gallery = null;
-      } catch (error) {
-        console.error('Error during cleanup:', error);
+      if (this.gallery) {
+        this.gallery.removeEventListener('mouseenter', this.boundMethods.pauseAll);
+        this.gallery.removeEventListener('mouseleave', this.boundMethods.resumeAll);
+        this.gallery.removeEventListener('touchstart', this.boundMethods.pauseAll);
+        this.gallery.removeEventListener('touchend', this.boundMethods.resumeAll);
       }
-    }
-
-    // Public destroy method
-    destroy() {
-      this.cleanup();
+      this.boundMethods = null;
+      this.isInitialized = false;
+      this.gallery = null;
     }
   }
 
@@ -534,6 +423,7 @@
   const initializeMarquee = () => {
     try {
       marquee = new ReviewMarquee();
+      window.reviewMarquee = marquee; // Make it globally accessible
     } catch (error) {
       console.error('Failed to initialize ReviewMarquee:', error);
     }
@@ -545,25 +435,22 @@
     initializeMarquee();
   }
 
-  // Optimized resize handler with proper cleanup
+  // Recalculate on window resize (with debouncing)
   let resizeTimeout;
-  const handleResize = () => {
+  window.addEventListener('resize', () => {
     clearTimeout(resizeTimeout);
     resizeTimeout = setTimeout(() => {
-      if (marquee && marquee.isInitialized) {
-        marquee.boundMethods.handleResize();
+      if (marquee) {
+        marquee.recalculate();
       }
     }, 250);
-  };
-
-  window.addEventListener('resize', handleResize);
+  });
 
   // Cleanup on page unload
   window.addEventListener('beforeunload', () => {
     if (marquee) {
       marquee.cleanup();
     }
-    window.removeEventListener('resize', handleResize);
   });
 {% endjavascript %}
 
