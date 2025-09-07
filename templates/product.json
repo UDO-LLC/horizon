@@ -179,6 +179,7 @@
                 "title": "UdoPaints Design Preview",
                 "background_color": "",
                 "main_color": "#000000",
+                "control_button_text_classes": "text-white",
                 "privacy_url": "https://yourapp.com/privacy",
                 "default_palette_colors": "24",
                 "backend_url": "https://udopaints-custom-app-dev-react-rout.vercel.app",
@@ -191,7 +192,7 @@
                 "preview_palette_colors_container_selector_string": "form.variant-picker__form",
                 "preview_palette_colors_button_position": "static",
                 "debug_mode": true,
-                "debug_wonder_kit_mode": true
+                "debug_wonder_kit_mode": false
               }
             },
             "variant_picker_R3rGDr": {

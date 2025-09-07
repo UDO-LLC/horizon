@@ -178,7 +178,12 @@
               "settings": {
                 "title": "UdoPaints Design Preview",
                 "background_color": "",
-                "main_color": "#2a4759",
+                "main_color": "#5f4173",
+                "control_button_text_classname": "text-white",
+                "preview_editor_control_button_background_color": "#bbbbbb",
+                "preview_editor_control_button_text_classname": "text-black",
+                "preview_palette_colors_control_button_background_color": "#bbbbbb",
+                "preview_palette_colors_control_button_text_classname": "text-white",
                 "privacy_url": "https://yourapp.com/privacy",
                 "default_palette_colors": "24",
                 "backend_url": "https://udopaints-custom-app-dev-react-rout.vercel.app",
