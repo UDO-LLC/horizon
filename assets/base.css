@@ -19,6 +19,7 @@ body {
   --hover-shadow-color: var(--color-shadow);
   --hover-transition-duration: 0.25s;
   --hover-transition-timing: ease-out;
+  --cart-item-control-button-size: calc(var(--minimum-touch-target) / 1.5);
 }
 
 html {
@@ -2581,7 +2582,7 @@ product-price.text-block:is(.h1, .h2, .h3, .h4, .h5, .h6) > *:not(.tax-note) {
 
 /* Quantity selector */
 .quantity-selector {
-  --quantity-selector-width: 124px;
+  --quantity-selector-width: 100px;
 
   display: flex;
   justify-content: space-between;
@@ -2612,8 +2613,8 @@ product-price.text-block:is(.h1, .h2, .h3, .h4, .h5, .h6) > *:not(.tax-note) {
   justify-content: center;
   align-items: center;
   cursor: pointer;
-  width: var(--minimum-touch-target);
-  height: var(--minimum-touch-target);
+  width: var(--cart-item-control-button-size);
+  height: var(--cart-item-control-button-size);
   flex-shrink: 0;
   color: var(--color-input-text);
 }
@@ -2660,7 +2661,7 @@ product-price.text-block:is(.h1, .h2, .h3, .h4, .h5, .h6) > *:not(.tax-note) {
   text-align: center;
   border: none;
   appearance: none;
-  max-width: calc(var(--quantity-selector-width) - var(--minimum-touch-target) * 2);
+  max-width: calc(var(--quantity-selector-width) - var(--cart-item-control-button-size) * 2);
   border-radius: var(--style-border-radius-buttons);
   color: var(--color-input-text);
   background-color: transparent;

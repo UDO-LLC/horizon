@@ -140,22 +140,6 @@
                 </a>
 
                 <div class="cart-items__controls">
-
-                  {% comment %} Remove button {% endcomment %}
-                  <button
-                    class="button button--tertiary cart-items__remove"
-                    type="button"
-                    aria-label="{{ 'accessibility.remove_item' | t: title: item.title | escape }}"
-                    on:click="/onLineItemRemove/{{ item.index | plus: 1 }}"
-                    {% assign can_remove = item.instructions.can_remove | default: true, allow_false: true %}
-                    {% if can_remove == false %}
-                      hidden
-                    {% endif %}
-                  >
-                    {{- 'icon-delete.svg' | inline_asset_content -}}
-                    <span class="visually-hidden">Remove</span>
-                  </button>
-
                   <div class="cart-items__price-container">
                     {%- comment -%} Show price display for all items, but with different formatting for discount items {%- endcomment -%}
                     {%- liquid
@@ -191,6 +175,20 @@
                       class: 'cart-primary-typography',
                       can_update_quantity: can_update_quantity
                     %}
+                    {% comment %} Remove button {% endcomment %}
+                    <button
+                            class="button button--tertiary cart-items__remove"
+                            type="button"
+                            aria-label="{{ 'accessibility.remove_item' | t: title: item.title | escape }}"
+                            on:click="/onLineItemRemove/{{ item.index | plus: 1 }}"
+                            {% assign can_remove = item.instructions.can_remove | default: true, allow_false: true %}
+                            {% if can_remove == false %}
+                                hidden
+                            {% endif %}
+                    >
+                        {{- 'icon-delete.svg' | inline_asset_content -}}
+                        <span class="visually-hidden">Remove</span>
+                    </button>
                   </div>
                 </div>
               </div>
@@ -200,7 +198,10 @@
                   {% if settings.show_buy_x_get_y_discount %}
                     {%- for discount_allocation in item.discount_allocations -%}
                       <div class="cart-items__discount-item">
-                        <img src="{{ 'icon-discount-item.png' |  asset_url }}" class="cart-items__discount-icon" width="800" height="515" alt="Discount" />
+                        {% comment %}<img src="{{ 'icon-discount-item.png' |  asset_url }}" class="cart-items__discount-icon" width="800" height="515" alt="Discount" />{% endcomment %}
+                        <span class="cart-items__discount-icon">
+                          {{- "icon-discount-item.svg" | inline_asset_content -}}
+                        </span>
                         <span class="cart-items__discount-title">{{ discount_allocation.discount_application.title }}</span>
                         {%- comment -%} Only show amount for discount line items (when final price is 0 or less than original) {%- endcomment -%}
                         {%- if item.final_line_price == 0 or item.final_line_price < item.original_line_price -%}
@@ -364,8 +365,6 @@
     align-items: center;
     justify-content: flex-start;
     gap: var(--gap-xs);
-    position: relative;
-    margin-top: calc(var(--minimum-touch-target) / 2)
   }
 
   .cart-items__price-container {
@@ -406,8 +405,7 @@
     height: 2.25rem;
     flex-direction: row;
     align-items: center;
-    border-radius: 9999px;
-    border: 1px solid var(--color-border);
+    gap: var(--gap-2xs);
   }
 
   .cart-items__quantity-container .quantity-selector {
@@ -415,55 +413,17 @@
     height: 100%;
     flex-direction: row;
     align-items: center;
-    border-radius: 9999px;
+    border-radius: 1rem;
     border: 1px solid var(--color-border);
     font-size: var(--cart-font-size--sm);
-  }
-
-  .cart-items__quantity-container .quantity-selector__button {
-    display: flex;
-    height: 100%;
-    min-width: 2.25rem;
-    max-width: 2.25rem;
-    flex: none;
-    align-items: center;
-    justify-content: center;
-    border-radius: 9999px;
-    padding: 0 var(--padding-xs);
-    transition: all 0.2s ease;
-    border: none;
-    background: transparent;
-    cursor: pointer;
-  }
-
-  .cart-items__quantity-container .quantity-selector__button:hover {
-    border-color: var(--color-foreground);
-    opacity: 0.8;
-  }
-
-  .cart-items__quantity-container .quantity-selector__button:first-child {
-    margin-left: auto;
-  }
-
-  .cart-items__quantity-container .quantity-selector__input {
-    width: 1.5rem;
-    text-align: center;
-    border: none;
-    background: transparent;
-    font-size: var(--cart-font-size--sm);
-    padding: 0;
-  }
-
-  .cart-items__quantity-container .quantity-selector__input:focus {
-    outline: none;
   }
 
   .cart-items__remove {
     background-color: var(--color-secondary-button-background);
     color: var(--color-secondary-button-text);
     opacity: 0.8;
-    width: var(--minimum-touch-target);
-    height: var(--minimum-touch-target);
+    width: var(--cart-item-control-button-size);
+    height: var(--cart-item-control-button-size);
     border-radius: 100%;
     box-shadow: none;
     padding: 0;
@@ -471,9 +431,6 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    position: absolute;
-    top: -70%;
-    right: 0;
   }
 
   .cart-items__remove:hover {
@@ -666,9 +623,10 @@
     color: var(--color-primary-button-text);
   }
 
-  .cart-items__discount-icon {
+  .cart-items__discount-icon, .cart-items__discount-icon svg {
     background-color: transparent;
     width: var(--icon-size-md);
+    height: auto;
   }
 
   .cart-items__discount-title {
