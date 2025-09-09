@@ -126,13 +126,13 @@
   }
 
   .upsell-product__item:hover .upsell-product__checkbox {
-    border-color: #3b82f6;
+    border-color: var(--active-color);
   }
 
   /* Checked state styling */
   .upsell-product__checkbox-input:checked + .upsell-product__checkbox {
-    border-color: #3b82f6;
-    background: #3b82f6;
+    border-color: var(--active-color);
+    background: var(--active-color);
   }
 
   .upsell-product__checkbox-input:checked + .upsell-product__checkbox::after {
@@ -140,13 +140,10 @@
   }
 
   .upsell-product__item.upsell-product__item--selected {
-    border-color: #3b82f6;
-    background: rgba(59, 130, 246, 0.05);
-    box-shadow: 0 2px 4px rgba(59, 130, 246, 0.2);
+    border-color: var(--active-color);
   }
 
   .upsell-product__item.upsell-product__item--selected:hover {
-    box-shadow: 0 4px 8px rgba(59, 130, 246, 0.3);
   }
 
   /* Hidden state for upsell products */
@@ -156,18 +153,12 @@
 
   /* Add to Cart Button Styles when upsell products are selected */
   .btn--upsell-selected {
-    background: linear-gradient(135deg, #3b82f6, #1d4ed8) !important;
-    border-color: #3b82f6 !important;
     color: white !important;
     position: relative;
     overflow: hidden;
-    animation: upsellPulse 2s infinite;
   }
 
   .btn--upsell-selected:hover {
-    background: linear-gradient(135deg, #2563eb, #1e40af) !important;
-    transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
   }
 
   .btn--upsell-selected::before {
@@ -178,16 +169,6 @@
     transform: translateY(-50%);
     font-size: 0.9em;
     animation: sparkle 1.5s infinite;
-  }
-
-  /* Pulse animation for selected button */
-  @keyframes upsellPulse {
-    0%, 100% {
-      box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.7);
-    }
-    50% {
-      box-shadow: 0 0 0 10px rgba(59, 130, 246, 0);
-    }
   }
 
   /* Sparkle animation */
@@ -202,33 +183,6 @@
     }
   }
 
-  /* Upsell products summary indicator */
-  .upsell-summary {
-    background: rgba(59, 130, 246, 0.1);
-    border: 1px solid rgba(59, 130, 246, 0.2);
-    border-radius: 0.5rem;
-    padding: 0.75rem;
-    margin-top: 0.5rem;
-    font-size: 0.875rem;
-    color: #1e40af;
-    display: none;
-  }
-
-  .upsell-summary.show {
-    display: block;
-    animation: slideDown 0.3s ease;
-  }
-
-  @keyframes slideDown {
-    from {
-      opacity: 0;
-      transform: translateY(-10px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
-  }
 
   @media (max-width: 768px) {
     .upsell-product__item {

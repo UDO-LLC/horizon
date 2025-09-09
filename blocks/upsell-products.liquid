@@ -14,7 +14,8 @@
 %}
 
 <div 
-  class="product-block product-block--upsell" 
+  class="product-block product-block--upsell"
+  style="--active-color: {{ block_settings.active_color }};"
   {{ block.shopify_attributes }}
 >
   {%- render 'upsell-products-styles' -%}
@@ -32,11 +33,10 @@
       <script type="application/json" data-main-product-variants>{{ product.variants | json }}</script>
       {% for upsell_product in upsell_products limit: block_settings.max_products %}
         <label class="upsell-product__item" data-upsell-product="{{ upsell_product.id }}">
-          <img 
-            src="{{ upsell_product.featured_image | image_url: width: 80 }}" 
-            alt="{{ upsell_product.title }}" 
-            width="80" 
-            height="80"
+          <!-- DEBUG: {{ upsell_product.id }} -->
+          <img
+            src="{{ upsell_product.featured_image | image_url }}"
+            alt="{{ upsell_product.title }}"
             loading="lazy"
           >
           <div class="upsell-product__content">
@@ -105,11 +105,6 @@
 {% schema %}
 {
   "name": "Upsell Products",
-  "blocks": [
-    {
-      "type": "text"
-    }
-  ],
   "settings": [
     {
       "type": "header",
@@ -145,6 +140,12 @@
       "id": "show_description",
       "label": "Show description",
       "default": true
+    },
+    {
+      "type": "color",
+      "id": "active_color",
+      "label": "Active color",
+      "default": "#3b82f6"
     },
     {
       "type": "header",
