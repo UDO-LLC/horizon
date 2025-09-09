@@ -178,8 +178,13 @@
               "settings": {
                 "title": "UdoPaints Design Preview",
                 "background_color": "",
-                "main_color": "#000000",
-                "control_button_text_classes": "text-white",
+                "main_color": "#000000cf",
+                "control_button_text_classname": "text-white",
+                "preview_editor_control_button_background_color": "",
+                "preview_editor_control_button_text_classname": "",
+                "show_preview_palette_control_button": true,
+                "preview_palette_colors_control_button_background_color": "#eb7a57",
+                "preview_palette_colors_control_button_text_classname": "",
                 "privacy_url": "https://yourapp.com/privacy",
                 "default_palette_colors": "24",
                 "backend_url": "https://udopaints-custom-app-dev-react-rout.vercel.app",
@@ -192,7 +197,7 @@
                 "preview_palette_colors_container_selector_string": "form.variant-picker__form",
                 "preview_palette_colors_button_position": "static",
                 "debug_mode": true,
-                "debug_wonder_kit_mode": false
+                "debug_wonder_kit_mode": true
               }
             },
             "variant_picker_R3rGDr": {
@@ -232,6 +237,7 @@
                 "max_products": 4,
                 "show_price": true,
                 "show_description": true,
+                "active_color": "#eb7a57",
                 "enable_button_styling": false,
                 "sync_variants": true,
                 "hide_conditions": "Color Palette:pre-printed[Extra Paint];Color Palette:Printed[Extra Paint]"
