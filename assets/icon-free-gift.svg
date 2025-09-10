@@ -3,9 +3,7 @@
      viewBox="0 0 64 64"
      height="512"
      width="512"
-     stroke="currentColor"
-     stroke-width="2"
-     fill="none"
+     fill="currentColor"
 >
     <g id="Layer_7" display="none">
         <path d="m-257-89h410v410h-410z" display="inline" fill="#fff"/>
