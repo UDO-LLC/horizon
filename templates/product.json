@@ -185,8 +185,9 @@
                 "show_preview_palette_control_button": true,
                 "preview_palette_colors_control_button_background_color": "#eb7a57",
                 "preview_palette_colors_control_button_text_classname": "",
-                "privacy_url": "https://yourapp.com/privacy",
                 "default_palette_colors": "24",
+                "privacy_url": "https://yourapp.com/privacy",
+                "privacy_container": "main#MainContent",
                 "backend_url": "https://udopaints-custom-app-dev-react-rout.vercel.app",
                 "app_id": "269386743809",
                 "shopify_file_cdn_prefix": "https://cdn.shopify.com/s/files/1/0764/4912/0468/files",
@@ -233,7 +234,10 @@
             "upsell_products_block": {
               "type": "upsell-products",
               "settings": {
-                "products": "{{ closest.product.metafields.custom.upsell_products.value }}",
+                "products": [
+                  "extra-paint-1",
+                  "digital-file-1"
+                ],
                 "max_products": 4,
                 "show_price": true,
                 "show_description": true,

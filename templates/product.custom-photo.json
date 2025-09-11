@@ -235,7 +235,9 @@
               "type": "upsell-products",
               "name": "Upsell Products",
               "settings": {
-                "products": "{{ closest.product.metafields.custom.upsell_products.value }}",
+                "products": [
+                  "extra-paint-1"
+                ],
                 "max_products": 4,
                 "show_price": true,
                 "show_description": true,
