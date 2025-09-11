@@ -185,8 +185,9 @@
                 "show_preview_palette_control_button": false,
                 "preview_palette_colors_control_button_background_color": "#dedede",
                 "preview_palette_colors_control_button_text_classname": "text-black",
-                "privacy_url": "https://yourapp.com/privacy",
                 "default_palette_colors": "24",
+                "privacy_url": "shopify://policies/privacy-policy",
+                "privacy_container": "main#MainContent",
                 "backend_url": "https://udopaints-custom-app-dev-react-rout.vercel.app",
                 "app_id": "269386743809",
                 "shopify_file_cdn_prefix": "https://cdn.shopify.com/s/files/1/0764/4912/0468/files",
@@ -238,6 +239,7 @@
                 "max_products": 4,
                 "show_price": true,
                 "show_description": true,
+                "active_color": "#3b82f6",
                 "enable_button_styling": false,
                 "sync_variants": true,
                 "hide_conditions": "Color Palette:pre-printed[Extra Paint];Color Palette:Printed[Extra Paint];Color Palette:Printed (not a painting kit)[Extra Paint]"
