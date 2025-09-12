@@ -308,7 +308,10 @@ class ProductFormComponent extends Component {
 
     // Check if App Block is ready to export
     const { success, feature } = await this.#checkAppBlockState();
-    if (!success || !feature) return;
+
+    // Stop if App Block is not ready for a product feature
+    if (!success && !!feature) return;
+    // Continue if App Block is not ready but not a product feature
 
     this.refs.addToCartButtonContainer?.handleStartedAddingToCart();
 
@@ -541,8 +544,8 @@ class ProductFormComponent extends Component {
   async #checkAppBlockState() {
     try {
       const { success, feature, error } = await window.UdoPaintsEditorManager.isReadyToExport();
-      if (!success && feature !== 'gallery-kit') {
-        // If there is an error, disable the add to cart button
+      if (!success && !!feature && feature !== 'gallery-kit') {
+        // If there is an error, disable the `add to cart` button
         if (error) {
           this.refs.addToCartButtonContainer?.disable();
           console.warn('UdoPaints Editor App Block is not ready:', error);
@@ -582,6 +585,7 @@ class ProductFormComponent extends Component {
    * @returns {Promise<Record<string, any>>} The line item properties.
    */
   async #getLineItemProperties(feature, productId, variantId) {
+    if (!feature) return {};
     /** @type {Record<string, any>} */
     let properties = { _feature: feature };
     const { originalImage, previewImage, supplierImage, generatedImage } = await window.UdoPaintsEditorManager.onAddToCart({ productId, variantId });
@@ -605,7 +609,7 @@ class ProductFormComponent extends Component {
     };
     if (feature === 'wonder-kit') {
       if (!generatedImage) {
-        window.UdoPaintsEditorManager.onError('Failed to get generated image from Wonder Kit product');
+        await window.UdoPaintsEditorManager.onError('Failed to get generated image from Wonder Kit product');
         return properties;
       }
       properties = {
