@@ -58,11 +58,7 @@ if [ "$DEPLOY_BRANCH" = "main" ]; then
 fi
 git fetch origin main >/dev/null 2>&1 || true
 if ! git merge-base --is-ancestor "origin/main" "$DEPLOY_BRANCH"; then
-  echo "⚠️  Branch '$DEPLOY_BRANCH' might be behind main. Consider merging main first."
-else
-  if ! git merge-base --is-ancestor "$DEPLOY_BRANCH" "origin/main"; then
-    echo "⚠️  '$DEPLOY_BRANCH' is behind main. Please update it soon."
-  fi
+  echo "⚠️  Branch '$DEPLOY_BRANCH' does not include all commits from main. Consider merging main first."
 fi
 ENV_VAR_NAME="UDO_SHOPIFY_STORE_${DEPLOY_BRANCH^^}"
 STORE_URL="${!ENV_VAR_NAME}"
