@@ -173,32 +173,32 @@
               },
               "blocks": {}
             },
-            "udopaints_custom_app_admin_product_image_kit_YNqMtD": {
-              "type": "shopify://apps/udopaints-custom-app-admin/blocks/product-image-kit/d7f8e866-1422-4260-b641-e336c615a8a8",
+            "udopaints_custom_app_product_image_kit_NMwfh7": {
+              "type": "shopify://apps/udopaints-custom-app/blocks/product-image-kit/11a13a2a-4466-4ec0-9028-8218a58685b6",
               "settings": {
-                "title": "UdoPaints Design Preview",
+                "title": "UdoPaints Design Preview | Merchant Settings",
                 "background_color": "",
-                "main_color": "#000000cf",
+                "main_color": "#000000",
                 "control_button_text_classname": "text-white",
                 "preview_editor_control_button_background_color": "",
                 "preview_editor_control_button_text_classname": "",
                 "show_preview_palette_control_button": true,
-                "preview_palette_colors_control_button_background_color": "#eb7a57",
+                "preview_palette_colors_control_button_background_color": "",
                 "preview_palette_colors_control_button_text_classname": "",
                 "default_palette_colors": "24",
-                "privacy_url": "https://yourapp.com/privacy",
+                "privacy_url": "shopify://policies/privacy-policy",
                 "privacy_container": "main#MainContent",
-                "backend_url": "https://udopaints-custom-app-dev-react-rout.vercel.app",
-                "app_id": "269386743809",
-                "shopify_file_cdn_prefix": "https://cdn.shopify.com/s/files/1/0764/4912/0468/files",
-                "preview_editor_container_reference_selector_string": "fieldset.variant-option[data-option-name=\"orientation\"]",
+                "backend_url": "https://udopaints-custom-app-prod.vercel.app",
+                "app_id": "279868473345",
+                "shopify_file_cdn_prefix": "https://cdn.shopify.com/s/files/1/0916/7637/7451/files",
+                "preview_editor_container_reference_selector_string": "div.product-block > div[data-option-name=\"orientation\"]",
                 "preview_editor_container_insert_mode": "after",
-                "portrait_orientation_selector_string": "fieldset.variant-option[data-option-name=\"orientation\"] input[type=\"radio\"][data-handle=\"portrait\"]",
-                "landscape_orientation_selector_string": "fieldset.variant-option[data-option-name=\"orientation\"] input[type=\"radio\"][data-handle=\"landscape\"]",
+                "portrait_orientation_selector_string": "div.product-block fieldset[data-handle=\"orientation\"] input[type=\"radio\"][value=\"Portrait\"]",
+                "landscape_orientation_selector_string": "div.product-block fieldset[data-handle=\"orientation\"] input[type=\"radio\"][value=\"Landscape\"]",
                 "preview_palette_colors_container_selector_string": "form.variant-picker__form",
                 "preview_palette_colors_button_position": "static",
                 "debug_mode": true,
-                "debug_wonder_kit_mode": true
+                "debug_wonder_kit_mode": false
               }
             },
             "variant_picker_R3rGDr": {
@@ -215,10 +215,8 @@
                 "canvas_format_name": "Canvas Format",
                 "rolled_canvas_format_value": "Full Kit - No Frame",
                 "rolled_canvas_format_value_description": "",
-                "rolled_canvas_format_icon": "shopify://shop_images/rolled-kit_24952dcf-62b6-47ba-9907-8032fb7f61b0.png",
                 "stretched_canvas_format_value": "Full Kit - Framed",
                 "stretched_canvas_format_value_description": "🖼️ Ready to paint and hang\n😌 No assembly required\n⭐ 40% cheaper than local framing",
-                "stretched_canvas_format_icon": "shopify://shop_images/framed-canvas_7897cae7-e574-4458-9a33-c20ecf22ae8e.png",
                 "number_of_palette_colors_name": "Color Palette",
                 "palette_colors_24_value": "24 Colors",
                 "palette_colors_24_description": "For Beginners",
@@ -234,10 +232,7 @@
             "upsell_products_block": {
               "type": "upsell-products",
               "settings": {
-                "products": [
-                  "extra-paint-1",
-                  "digital-file-1"
-                ],
+                "products": [],
                 "max_products": 4,
                 "show_price": true,
                 "show_description": true,
@@ -434,7 +429,7 @@
           "block_order": [
             "group_icgrde",
             "divider_VJhene",
-            "udopaints_custom_app_admin_product_image_kit_YNqMtD",
+            "udopaints_custom_app_product_image_kit_NMwfh7",
             "variant_picker_R3rGDr",
             "upsell_products_block",
             "buy_buttons_eYQEYi",
