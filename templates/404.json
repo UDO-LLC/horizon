@@ -6,7 +6,8 @@
  * or related systems. Please exercise caution as any changes
  * made to this file may be overwritten.
  * ------------------------------------------------------------
- */{
+ */
+{
   "sections": {
     "main": {
       "type": "main-404",
@@ -19,7 +20,7 @@
             "width": "100%",
             "max_width": "normal",
             "alignment": "center",
-            "type_preset": "h3",
+            "type_preset": "h2",
             "font": "var(--font-primary--family)",
             "font_size": "",
             "line_height": "normal",
@@ -140,7 +141,7 @@
                 "width": "fit-content",
                 "max_width": "normal",
                 "alignment": "left",
-                "type_preset": "h4",
+                "type_preset": "h3",
                 "font": "var(--font-primary--family)",
                 "font_size": "",
                 "line_height": "normal",
@@ -168,7 +169,7 @@
           "name": "t:names.product_card",
           "static": true,
           "settings": {
-            "product_card_gap": 4,
+            "product_card_gap": 8,
             "inherit_color_scheme": true,
             "color_scheme": "",
             "border": "none",
@@ -185,7 +186,7 @@
               "type": "_product-card-gallery",
               "name": "t:names.product_card_media",
               "settings": {
-                "image_ratio": "adapt",
+                "image_ratio": "portrait",
                 "border": "none",
                 "border_width": 1,
                 "border_opacity": 100,
@@ -253,7 +254,7 @@
           ]
         }
       },
-      "name": "Featured collection",
+      "name": "t:names.products_grid",
       "settings": {
         "collection": "all",
         "layout_type": "grid",

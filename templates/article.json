@@ -6,7 +6,8 @@
  * or related systems. Please exercise caution as any changes
  * made to this file may be overwritten.
  * ------------------------------------------------------------
- */{
+ */
+{
   "sections": {
     "section": {
       "type": "main-blog-post",
@@ -40,7 +41,7 @@
         },
         "blog-post-details": {
           "type": "_blog-post-info-text",
-          "name": "Details",
+          "name": "Blog post details",
           "static": true,
           "settings": {
             "show_date": true,

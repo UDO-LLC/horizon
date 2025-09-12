@@ -130,7 +130,7 @@
               "name": "t:names.collection_card_image",
               "static": true,
               "settings": {
-                "image_ratio": "adapt",
+                "image_ratio": "portrait",
                 "toggle_overlay": false,
                 "overlay_color": "#00000026",
                 "overlay_style": "solid",
@@ -151,7 +151,7 @@
       "block_order": [
         "group_4FtiAg"
       ],
-      "name": "Collection list",
+      "name": "t:names.collections_grid",
       "settings": {
         "layout_type": "grid",
         "carousel_on_mobile": false,
