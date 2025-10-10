@@ -151,7 +151,7 @@
       "block_order": [
         "group_4FtiAg"
       ],
-      "name": "Collection list",
+      "name": "t:names.collection_list",
       "settings": {
         "layout_type": "grid",
         "carousel_on_mobile": false,
