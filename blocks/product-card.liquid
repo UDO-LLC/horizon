@@ -34,6 +34,9 @@
       "type": "_product-card-gallery"
     },
     {
+      "type": "_featured-product-badge"
+    },
+    {
       "type": "product-title"
     },
     {
@@ -191,6 +194,10 @@
             "padding-inline-end": 0
           }
         },
+        "badge": {
+          "type": "_featured-product-badge",
+          "name": "t:names.product-badge"
+        },
         "product_title": {
           "type": "product-title",
           "name": "t:names.product_title",
@@ -238,7 +245,7 @@
           }
         }
       },
-      "block_order": ["product-card-gallery", "product_title", "price"]
+      "block_order": ["product-card-gallery", "badge", "product_title", "price"]
     }
   ]
 }

@@ -1,0 +1,136 @@
+{% liquid
+  assign product = closest.product
+  assign classname = product.title | handle
+  assign show_product_badge = false
+  assign flags = block.settings.product_badge_on_tags | split: ','
+  for tag in product.tags
+    assign handleized_tag = tag | handle
+    for flag in flags
+      if flag == handleized_tag
+        assign show_product_badge = true
+        break
+      endif
+    endfor
+    if show_product_badge == true
+      break
+    endif
+  endfor
+%}
+
+{% if show_product_badge == true %}
+  <style>
+    .{{ classname }}-badge-container {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background-color: {{ block.settings.background_color }};
+      border-radius: {{ block.settings.border_radius }}px;
+      width: 100%;
+    }
+    .{{ classname }}-badge-text {
+      color: {{ block.settings.text_color }};
+      font-weight: bold;
+      font-size: {{ block.settings.font_size }};
+      margin: 0;
+    }
+    @media only screen and (max-width: 750px) {
+      .{{ classname }}-badge-text {
+        font-size: {{ block.settings.font_size_mobile }}
+      }
+    }
+  </style>
+
+  <div class="{{ classname }}-badge-container">
+    <p class="{{ classname }}-badge-text">{{ block.settings.product_badge }}</p>
+  </div>
+{% endif %}
+
+{% schema %}
+{
+  "name": "t:names.product_badge",
+  "tag": null,
+  "settings": [
+    {
+      "type": "text",
+      "id": "product_badge",
+      "label": "t:settings.label",
+      "default": "Personalized"
+    },
+    {
+      "type": "select",
+      "id": "font_size",
+      "label": "t:settings.size",
+      "options": [
+        { "value": "", "label": "t:options.default" },
+        { "value": "0.625rem", "label": "10px" },
+        { "value": "0.75rem", "label": "12px" },
+        { "value": "0.875rem", "label": "14px" },
+        { "value": "1rem", "label": "16px" },
+        { "value": "1.125rem", "label": "18px" },
+        { "value": "1.25rem", "label": "20px" },
+        { "value": "1.5rem", "label": "24px" },
+        { "value": "2rem", "label": "32px" },
+        { "value": "2.5rem", "label": "40px" },
+        { "value": "3rem", "label": "48px" },
+        { "value": "3.5rem", "label": "56px" },
+        { "value": "4.5rem", "label": "72px" },
+        { "value": "5.5rem", "label": "88px" },
+        { "value": "7.5rem", "label": "120px" },
+        { "value": "9.5rem", "label": "152px" },
+        { "value": "11.5rem", "label": "184px" }
+      ],
+      "default": "1.125rem"
+    },
+    {
+      "type": "select",
+      "id": "font_size_mobile",
+      "label": "t:settings.size_mobile",
+      "options": [
+        { "value": "", "label": "t:options.default" },
+        { "value": "0.5rem", "label": "8px" },
+        { "value": "0.625rem", "label": "10px" },
+        { "value": "0.75rem", "label": "12px" },
+        { "value": "0.875rem", "label": "14px" },
+        { "value": "1rem", "label": "16px" },
+        { "value": "1.125rem", "label": "18px" },
+        { "value": "1.25rem", "label": "20px" },
+        { "value": "1.375rem", "label": "22px" },
+        { "value": "1.5rem", "label": "24px" },
+        { "value": "1.625rem", "label": "26px" },
+        { "value": "1.75rem", "label": "28px" },
+        { "value": "1.875rem", "label": "30px" },
+        { "value": "2rem", "label": "32px" }
+      ],
+      "default": "1rem"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "t:settings.colors",
+      "default": "#000000"
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "t:settings.background_color",
+      "default": "#ffffff"
+    },
+    {
+      "type": "range",
+      "id": "border_radius",
+      "label": "t:settings.border_radius",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "text",
+      "id": "product_badge_on_tags",
+      "label": "t:settings.product_badge_on_tags",
+      "default": "custom-photo-kit,wonder-kit,custom-photo-kits,wonder-kits"
+    }
+  ]
+}
+{% endschema %}

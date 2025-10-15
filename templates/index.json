@@ -203,26 +203,17 @@
               },
               "blocks": {}
             },
-            "price_JQzVV4": {
-              "type": "price",
-              "name": "t:names.product_price",
+            "badge": {
+              "type": "_featured-product-badge",
+              "name": "t:names.product_badge",
               "settings": {
-                "show_sale_price_first": true,
-                "show_installments": false,
-                "show_tax_info": false,
-                "type_preset": "custom",
-                "width": "100%",
-                "alignment": "left",
-                "font": "var(--font-subheading--family)",
-                "font_size": "1rem",
-                "line_height": "normal",
-                "letter_spacing": "normal",
-                "case": "none",
-                "color": "var(--color-foreground-heading)",
-                "padding-block-start": 0,
-                "padding-block-end": 0,
-                "padding-inline-start": 0,
-                "padding-inline-end": 0
+                "product_badge": "Personalized",
+                "font_size": "1.5rem",
+                "font_size_mobile": "1.125rem",
+                "text_color": "#ffffff",
+                "background_color": "#eb7a57",
+                "border_radius": 5,
+                "product_badge_on_tags": "custom-photo-kit,wonder-kit,custom-photo-kits,wonder-kits"
               },
               "blocks": {}
             },
@@ -232,8 +223,8 @@
               "settings": {
                 "width": "100%",
                 "max_width": "normal",
-                "alignment": "left",
-                "type_preset": "rte",
+                "alignment": "center",
+                "type_preset": "h4",
                 "font": "var(--font-body--family)",
                 "font_size": "1rem",
                 "line_height": "normal",
@@ -250,12 +241,36 @@
                 "padding-inline-end": 0
               },
               "blocks": {}
+            },
+            "price_FLekLJ": {
+              "type": "price",
+              "name": "t:names.product_price",
+              "settings": {
+                "show_sale_price_first": true,
+                "show_installments": false,
+                "show_tax_info": false,
+                "type_preset": "h4",
+                "width": "100%",
+                "alignment": "center",
+                "font": "var(--font-subheading--family)",
+                "font_size": "1rem",
+                "line_height": "normal",
+                "letter_spacing": "normal",
+                "case": "none",
+                "color": "var(--color-foreground-heading)",
+                "padding-block-start": 0,
+                "padding-block-end": 0,
+                "padding-inline-start": 0,
+                "padding-inline-end": 0
+              },
+              "blocks": {}
             }
           },
           "block_order": [
             "product_card_gallery_677WP3",
-            "price_JQzVV4",
-            "product_title_YXxMTj"
+            "badge",
+            "product_title_YXxMTj",
+            "price_FLekLJ"
           ]
         }
       },

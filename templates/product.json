@@ -71,8 +71,6 @@
               "type": "group",
               "name": "Header",
               "settings": {
-                "link": "",
-                "open_in_new_tab": false,
                 "content_direction": "column",
                 "vertical_on_mobile": true,
                 "horizontal_alignment": "flex-start",
@@ -96,11 +94,13 @@
                 "border_width": 1,
                 "border_opacity": 100,
                 "border_radius": 0,
-                "placeholder": "",
                 "toggle_overlay": false,
                 "overlay_color": "#00000026",
                 "overlay_style": "solid",
                 "gradient_direction": "to top",
+                "link": "",
+                "open_in_new_tab": false,
+                "placeholder": "",
                 "padding-block-start": 0,
                 "padding-block-end": 0,
                 "padding-inline-start": 0,
@@ -189,7 +189,6 @@
                 "privacy_url": "https://yourapp.com/privacy",
                 "privacy_container": "main#MainContent",
                 "backend_url": "https://udopaints-custom-app-dev-react-rout.vercel.app",
-                "app_id": "269386743809",
                 "shopify_file_cdn_prefix": "https://cdn.shopify.com/s/files/1/0764/4912/0468/files",
                 "preview_editor_container_reference_selector_string": "fieldset.variant-option[data-option-name=\"orientation\"]",
                 "preview_editor_container_insert_mode": "after",
@@ -516,14 +515,28 @@
               },
               "blocks": {}
             },
+            "badge": {
+              "type": "_featured-product-badge",
+              "name": "t:names.product_badge",
+              "settings": {
+                "product_badge": "Personalized",
+                "font_size": "1rem",
+                "font_size_mobile": "0.75rem",
+                "text_color": "#ffffff",
+                "background_color": "#eb7a57",
+                "border_radius": 4,
+                "product_badge_on_tags": "custom-photo-kit,wonder-kit,custom-photo-kits,wonder-kits"
+              },
+              "blocks": {}
+            },
             "product_title_M7MJkb": {
               "type": "product-title",
               "name": "t:names.product_title",
               "settings": {
                 "width": "100%",
                 "max_width": "normal",
-                "alignment": "left",
-                "type_preset": "rte",
+                "alignment": "center",
+                "type_preset": "h4",
                 "font": "var(--font-body--family)",
                 "font_size": "1rem",
                 "line_height": "normal",
@@ -547,9 +560,9 @@
                 "show_sale_price_first": true,
                 "show_installments": false,
                 "show_tax_info": false,
-                "type_preset": "h6",
+                "type_preset": "h4",
                 "width": "100%",
-                "alignment": "left",
+                "alignment": "center",
                 "font": "var(--font-body--family)",
                 "font_size": "1rem",
                 "line_height": "normal",
@@ -566,6 +579,7 @@
           },
           "block_order": [
             "product_card_gallery_DNizbJ",
+            "badge",
             "product_title_M7MJkb",
             "price_gLWgA6"
           ]
