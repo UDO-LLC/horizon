@@ -36,7 +36,18 @@
             "padding-block-start": 0,
             "padding-block-end": 0,
             "padding-inline-start": 0,
-            "padding-inline-end": 0
+            "padding-inline-end": 0,
+            "product_media_badge_enabled": true,
+            "product_media_badge": "Personalized",
+            "product_media_badge_font_size": "1.125rem",
+            "product_media_badge_font_size_mobile": "1rem",
+            "product_media_badge_text_color": "#ffffff",
+            "product_media_badge_background_color": "#eb7a57",
+            "product_media_badge_border_radius": 6,
+            "product_media_badge_on_tags": "custom-photo-kit,wonder-kit,custom-photo-kits,wonder-kits",
+            "product_media_badge_position": "bottom_left",
+            "product_media_badge_position_percentage_x": 3,
+            "product_media_badge_position_percentage_y": 3
           },
           "blocks": {}
         },

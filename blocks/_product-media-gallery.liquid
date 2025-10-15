@@ -77,6 +77,24 @@
       assign icons_position = 'left'
     endif
   endif
+
+  # Show product badge condition
+  assign show_product_media_badge = false
+  if block_settings.product_media_badge_enabled == true
+    assign flags = block_settings.product_media_badge_on_tags | split: ","
+    for tag in selected_product.tags
+      assign handleized_tag = tag | handle
+      for flag in flags
+        if flag == handleized_tag
+          assign show_product_media_badge = true
+          break
+        endif
+      endfor
+      if show_product_media_badge == true
+        break
+      endif
+    endfor
+  endif
 -%}
 
 {%- liquid
@@ -238,6 +256,50 @@
       background-color: var(--color-background);
     }
   {% endif %}
+
+  /* Product badge */
+  {% if show_product_media_badge %}
+    .product-media-badge {
+      position: absolute;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background-color: {{ block_settings.product_media_badge_background_color }};
+      border-radius: {{ block_settings.product_media_badge_border_radius }}px;
+      padding: 5px 20px;
+    }
+    .product-media-badge-text {
+      color: {{ block_settings.product_media_badge_text_color }};
+      font-weight: bold;
+      font-size: {{ block_settings.product_media_badge_font_size }};
+      margin: 0;
+    }
+    @media only screen and (max-width: 750px) {
+      .product-media-badge {
+        padding: 0 15px;
+      }
+      .product-media-badge-text {
+        font-size: {{ block_settings.product_media_badge_font_size_mobile }};
+      }
+    }
+    .product-media-badge__top-left {
+      top: {{ block_settings.product_media_badge_position_percentage_y }}%;
+      left: {{ block_settings.product_media_badge_position_percentage_x }}%;
+    }
+    .product-media-badge__top-right {
+      top: {{ block_settings.product_media_badge_position_percentage_y }}%;
+      right: {{ block_settings.product_media_badge_position_percentage_x }}%;
+    }
+    .product-media-badge__bottom-right {
+      bottom: {{ block_settings.product_media_badge_position_percentage_y }}%;
+      right: {{ block_settings.product_media_badge_position_percentage_x }}%;
+    }
+    .product-media-badge__bottom-left {
+      bottom: {{ block_settings.product_media_badge_position_percentage_y }}%;
+      left: {{ block_settings.product_media_badge_position_percentage_x }}%;
+    }
+  {% endif %}
+
 {% endstyle %}
 
 {% liquid
@@ -330,6 +392,25 @@
         attributes: attributes,
         media_fit: block_settings.media_fit,
       %}
+      {% comment %} Product Badge On Media {% endcomment %}
+      {% if show_product_media_badge == true %}
+        {% capture product_media_badge_position_class %}
+          {% case block_settings.product_media_badge_position %}
+            {% when 'top_left' %}
+              product-media-badge__top-left
+            {% when 'top_right' %}
+              product-media-badge__top-right
+            {% when 'bottom_right' %}
+              product-media-badge__bottom-right
+            {% else %}
+              {% comment %} Default is bottom_left {% endcomment %}
+              product-media-badge__bottom-left
+          {% endcase %}
+        {% endcapture %}
+        <div class="product-media-badge {{ product_media_badge_position_class }}">
+          <p class="product-media-badge-text">{{ block_settings.product_media_badge }}</p>
+        </div>
+      {% endif %}
     {% endfor %}
   {% endcapture %}
 
@@ -986,6 +1067,128 @@
       "step": 1,
       "unit": "px",
       "default": 0
+    },
+    {
+      "type": "header",
+      "content": "t:names.product_badge"
+    },
+    {
+      "type": "checkbox",
+      "id": "product_media_badge_enabled",
+      "label": "t:settings.enable",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "product_media_badge",
+      "label": "t:settings.label",
+      "default": "Personalized"
+    },
+    {
+      "type": "select",
+      "id": "product_media_badge_font_size",
+      "label": "t:settings.size",
+      "options": [
+        { "value": "", "label": "t:options.default" },
+        { "value": "0.625rem", "label": "10px" },
+        { "value": "0.75rem", "label": "12px" },
+        { "value": "0.875rem", "label": "14px" },
+        { "value": "1rem", "label": "16px" },
+        { "value": "1.125rem", "label": "18px" },
+        { "value": "1.25rem", "label": "20px" },
+        { "value": "1.5rem", "label": "24px" },
+        { "value": "2rem", "label": "32px" },
+        { "value": "2.5rem", "label": "40px" },
+        { "value": "3rem", "label": "48px" },
+        { "value": "3.5rem", "label": "56px" },
+        { "value": "4.5rem", "label": "72px" },
+        { "value": "5.5rem", "label": "88px" },
+        { "value": "7.5rem", "label": "120px" },
+        { "value": "9.5rem", "label": "152px" },
+        { "value": "11.5rem", "label": "184px" }
+      ],
+      "default": "1.125rem"
+    },
+    {
+      "type": "select",
+      "id": "product_media_badge_font_size_mobile",
+      "label": "t:settings.size_mobile",
+      "options": [
+        { "value": "", "label": "t:options.default" },
+        { "value": "0.5rem", "label": "8px" },
+        { "value": "0.625rem", "label": "10px" },
+        { "value": "0.75rem", "label": "12px" },
+        { "value": "0.875rem", "label": "14px" },
+        { "value": "1rem", "label": "16px" },
+        { "value": "1.125rem", "label": "18px" },
+        { "value": "1.25rem", "label": "20px" },
+        { "value": "1.375rem", "label": "22px" },
+        { "value": "1.5rem", "label": "24px" },
+        { "value": "1.625rem", "label": "26px" },
+        { "value": "1.75rem", "label": "28px" },
+        { "value": "1.875rem", "label": "30px" },
+        { "value": "2rem", "label": "32px" }
+      ],
+      "default": "1rem"
+    },
+    {
+      "type": "color",
+      "id": "product_media_badge_text_color",
+      "label": "t:settings.colors",
+      "default": "#000000"
+    },
+    {
+      "type": "color",
+      "id": "product_media_badge_background_color",
+      "label": "t:settings.background_color",
+      "default": "#ffffff"
+    },
+    {
+      "type": "range",
+      "id": "product_media_badge_border_radius",
+      "label": "t:settings.border_radius",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "text",
+      "id": "product_media_badge_on_tags",
+      "label": "t:settings.product_badge_on_tags",
+      "default": "custom-photo-kit,wonder-kit,custom-photo-kits,wonder-kits"
+    },
+    {
+      "type": "select",
+      "id": "product_media_badge_position",
+      "label": "t:settings.position",
+      "options": [
+        { "label": "Top Left", "value": "top_left" },
+        { "label": "Top Right", "value": "top_right" },
+        { "label": "Bottom Left", "value": "bottom_left" },
+        { "label": "Bottom Right", "value": "bottom_right" }
+      ]
+    },
+    {
+      "type": "range",
+      "id": "product_media_badge_position_percentage_x",
+      "label": "t:settings.percent_width",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "%",
+      "default": 5
+    },
+    {
+      "type": "range",
+      "id": "product_media_badge_position_percentage_y",
+      "label": "t:settings.percent_height",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "%",
+      "default": 5
     }
   ],
   "presets": [
