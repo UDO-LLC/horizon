@@ -152,6 +152,7 @@
     "share_information_about_your": "<p>Share information about your brand with your customers. Describe a product, make announcements, or welcome customers to your store.</p>"
   },
   "info": {
+    "applies_on_selected_element_only": "Applies to the selected one",
     "applies_on_image_only": "Applies to images only",
     "aspect_ratio_adjusted": "Adjusted in some layouts",
     "auto_open_cart_drawer": "When enabled, the cart drawer will automatically open when a product is added to cart.",
@@ -729,6 +730,7 @@
     "border_opacity": "Border opacity",
     "border_radius": "Corner radius",
     "border_style": "Border style",
+    "border_color": "Border color",
     "border_thickness": "Border thickness",
     "border_width": "Border thickness",
     "borders": "Borders",

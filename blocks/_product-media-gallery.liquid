@@ -21,6 +21,11 @@
   else
     assign controls_on_media = true
   endif
+  if block_settings.slideshow_mobile_controls_style == 'thumbnails'
+    assign mobile_controls_on_media = false
+  else
+    assign mobile_controls_on_media = true
+  endif
 
   assign render_slideshow_controls = false
 
@@ -39,6 +44,7 @@
   endif
 
   assign slideshow_controls_style = block_settings.slideshow_controls_style
+  assign slideshow_mobile_controls_style = block_settings.slideshow_mobile_controls_style
   # Use a counter instead of dots when there are many images to avoid cropping/overflow.
   if slideshow_controls_style == 'dots' and selected_product.media.size > 15
     assign slideshow_controls_style = 'counter'
@@ -62,9 +68,18 @@
     assign pagination_position = 'center'
   endif
 
+  if slideshow_mobile_controls_style == 'thumbnails'
+    assign mobile_pagination_position = block_settings.thumbnail_position
+  else
+    assign mobile_pagination_position = 'center'
+  endif
+
   # correct discrepancy between position settings for thumbnails and other controls
   if pagination_position == 'bottom'
     assign pagination_position = 'center'
+  endif
+  if mobile_pagination_position == 'bottom'
+    assign mobile_pagination_position = 'center'
   endif
 
   assign icons_position = 'center'
@@ -341,14 +356,23 @@
       {% if block_settings.media_columns == "two" and block_settings.large_first_image%}media-gallery--large-first-image{% endif %}
     {% endif %}
     media-gallery--{{ block_settings.media_presentation }}
-    {% if block_settings.slideshow_mobile_controls_style == 'hint' %}
+    {% if slideshow_mobile_controls_style == 'hint' %}
       media-gallery--hint
     {% endif %}
     {% if block_settings.extend_media %}
       media-gallery--extend
     {% endif %}
   "
-  style="{% render 'spacing-style', settings: block_settings %} --thumbnail-width: {{ block_settings.thumbnail_width }}px; --media-radius: {{ block_settings.media_radius }}px;{% if block_settings.icons_style contains 'large' %} --slideshow-icon-padding: 0px;{% endif %}--image-gap: {{ block_settings.image_gap }}px;{% unless block_settings.aspect_ratio == 'adapt' %} --gallery-aspect-ratio: {{ block_settings.aspect_ratio }};{% endunless %}"
+  {% comment %} style="{% render 'spacing-style', settings: block_settings %} --thumbnail-width: {{ block_settings.thumbnail_width }}px; --media-radius: {{ block_settings.media_radius }}px;{% if block_settings.icons_style contains 'large' %} --slideshow-icon-padding: 0px;{% endif %}--image-gap: {{ block_settings.image_gap }}px;{% unless block_settings.aspect_ratio == 'adapt' %} --gallery-aspect-ratio: {{ block_settings.aspect_ratio }};{% endunless %}" {% endcomment %}
+  style="
+    {% render 'spacing-style', settings: block_settings %}
+    --thumbnail-width: {{ block_settings.thumbnail_width }}px;
+    --media-radius: {{ block_settings.media_radius }}px;
+    {% if block_settings.icons_style contains 'large' %} --slideshow-icon-padding: 0px;{% endif %}
+    --image-gap: {{ block_settings.image_gap }}px;
+    {% unless block_settings.aspect_ratio == 'adapt' %} --gallery-aspect-ratio: {{ block_settings.aspect_ratio }};{% endunless %}
+    --selected-thumbnail-border-style: {{ block_settings.thumbnail_selected_border_thinkness }}px solid {{ block_settings.thumbnail_selected_border_color }}; 
+    "
   data-presentation="{{ block_settings.media_presentation }}"
   {{ block.shopify_attributes }}
 >
@@ -431,10 +455,12 @@
       {% if render_mobile_slideshow_controls %}
         {%- render 'slideshow-controls',
           class: 'desktop:hidden media-gallery__mobile-controls',
-          style: block_settings.slideshow_mobile_controls_style,
+          style: slideshow_mobile_controls_style,
           item_count: sorted_media.size,
-          controls_on_media: true,
-          pagination_position: 'center',
+          thumbnails: sorted_media,
+          controls_on_media: mobile_controls_on_media,
+          pagination_position: mobile_pagination_position,
+          aspect_ratio: block_settings.aspect_ratio
         -%}
       {% endif %}
     {% endcapture %}
@@ -898,13 +924,17 @@
         {
           "value": "hint",
           "label": "t:options.hint"
+        },
+        {
+          "value": "thumbnails",
+          "label": "t:options.thumbnails"
         }
       ]
     },
     {
       "type": "header",
       "content": "t:content.thumbnails",
-      "visible_if": "{{ block.settings.media_presentation == 'carousel' and block.settings.slideshow_controls_style == 'thumbnails' }}"
+      "visible_if": "{{ block.settings.media_presentation == 'carousel' }}"
     },
     {
       "type": "select",
@@ -925,7 +955,7 @@
         }
       ],
       "default": "bottom",
-      "visible_if": "{{ block.settings.media_presentation == 'carousel' and block.settings.slideshow_controls_style == 'thumbnails' }}"
+      "visible_if": "{{ block.settings.media_presentation == 'carousel' }}"
     },
     {
       "type": "range",
@@ -936,7 +966,27 @@
       "step": 1,
       "unit": "px",
       "default": 64,
-      "visible_if": "{{ block.settings.media_presentation == 'carousel' and block.settings.slideshow_controls_style == 'thumbnails' }}"
+      "visible_if": "{{ block.settings.media_presentation == 'carousel' }}"
+    },
+    {
+      "type": "color",
+      "id": "thumbnail_selected_border_color",
+      "label": "t:settings.border_color",
+      "info": "t:info.applies_on_selected_element_only",
+      "default": "#000000",
+      "visible_if": "{{ block.settings.media_presentation == 'carousel' }}"
+    },
+    {
+      "type": "range",
+      "id": "thumbnail_selected_border_thinkness",
+      "label": "t:settings.border_thickness",
+      "info": "t:info.applies_on_selected_element_only",
+      "min": 1,
+      "max": 5,
+      "step": 1,
+      "default": 2,
+      "unit": "px",
+      "visible_if": "{{ block.settings.media_presentation == 'carousel' }}"
     },
     {
       "type": "header",
