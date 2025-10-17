@@ -64,6 +64,7 @@
   {% if class %}
     class="{{ class }}"
   {% endif %}
+  style="grid-area: controls-{% if pagination_position != 'center' %}{{ pagination_position }}{% else %}bottom{% endif %}"
 >
   {% if show_arrows_separately == false and show_arrows and pagination_position != 'left' %}
     <div class="slideshow-controls__arrows">

@@ -3374,7 +3374,7 @@ slideshow-controls {
   justify-content: space-between;
   scrollbar-width: none;
   min-height: var(--minimum-touch-target);
-  grid-area: controls;
+  /* grid-area: controls; */
 
   &[controls-on-media] {
     position: absolute;
@@ -3419,17 +3419,19 @@ slideshow-component:has(slideshow-controls[thumbnails]) {
   &:has(slideshow-controls[pagination-position='right']) {
     display: grid;
     grid-template:
-      'container controls' auto
-      'arrows controls' min-content
-      / 1fr auto;
-  }
-
-  &:has(slideshow-controls[pagination-position='left']) {
-    display: grid;
-    grid-template:
-      'controls container' auto
-      'controls arrows' min-content
-      / auto 1fr;
+      'controls-left container controls-right' auto
+      'controls-left arrows controls-right' min-content
+      'controls-bottom controls-bottom controls-bottom' auto
+      / auto 1fr auto;
+    }
+    
+    &:has(slideshow-controls[pagination-position='left']) {
+      display: grid;
+      grid-template:
+      'controls-left container controls-right' auto
+      'controls-left arrows controls-right' min-content
+      'controls-bottom controls-bottom controls-bottom' auto
+      / auto 1fr auto;
   }
 
   slideshow-controls[pagination-position='left'] {

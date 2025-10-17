@@ -34,13 +34,10 @@
   endif
 
   assign render_mobile_slideshow_controls = false
-
-  if block_settings.slideshow_controls_style != block_settings.slideshow_mobile_controls_style
+  
+  if block_settings.slideshow_mobile_controls_style != 'hint'
     assign slideshow_controls_class = 'mobile:hidden'
-
-    if block_settings.slideshow_mobile_controls_style != 'hint'
-      assign render_mobile_slideshow_controls = true
-    endif
+    assign render_mobile_slideshow_controls = true
   endif
 
   assign slideshow_controls_style = block_settings.slideshow_controls_style
@@ -69,7 +66,7 @@
   endif
 
   if slideshow_mobile_controls_style == 'thumbnails'
-    assign mobile_pagination_position = block_settings.thumbnail_position
+    assign mobile_pagination_position = block_settings.mobile_thumbnail_position
   else
     assign mobile_pagination_position = 'center'
   endif
@@ -454,7 +451,7 @@
 
       {% if render_mobile_slideshow_controls %}
         {%- render 'slideshow-controls',
-          class: 'desktop:hidden media-gallery__mobile-controls',
+          class: 'desktop:hidden',
           style: slideshow_mobile_controls_style,
           item_count: sorted_media.size,
           thumbnails: sorted_media,
@@ -773,6 +770,7 @@
     z-index: var(--layer-raised);
   }
 
+  /* Deprecated since Oct 18 2025 */
   .media-gallery__mobile-controls {
     grid-area: auto;
   }
@@ -955,7 +953,28 @@
         }
       ],
       "default": "bottom",
-      "visible_if": "{{ block.settings.media_presentation == 'carousel' }}"
+      "visible_if": "{{ block.settings.media_presentation == 'carousel' and block.settings.slideshow_controls_style == 'thumbnails' }}"
+    },
+    {
+      "type": "select",
+      "id": "mobile_thumbnail_position",
+      "label": "t:settings.position_on_mobile",
+      "options": [
+        {
+          "value": "left",
+          "label": "t:options.left"
+        },
+        {
+          "value": "bottom",
+          "label": "t:options.bottom"
+        },
+        {
+          "value": "right",
+          "label": "t:options.right"
+        }
+      ],
+      "default": "bottom",
+      "visible_if": "{{ block.settings.media_presentation == 'carousel' and block.settings.slideshow_mobile_controls_style == 'thumbnails' }}"
     },
     {
       "type": "range",
