@@ -68,14 +68,37 @@
   if block_settings.filter_style == 'vertical'
     assign should_show_vertical_clear_all = false
   endif
+
+  assign should_use_new_checkbox_style = false
+  if block_settings.enable_filtering == true and block_settings.filter_style == 'vertical' and block_settings.filter_checkbox_style == 'tabs'
+    assign should_use_new_checkbox_style = true
+  endif
 -%}
+
+{% if should_use_new_checkbox_style == true %}
+  {% capture new_filter_checkbox_css %}
+    --filter-checkbox-color: {{ block_settings.filter_tabs_color }};
+    --filter-checkbox-font-size: {{ block_settings.filter_tabs_font_size }}px;
+    --finter-checkbox-font-weight: {{ block_settings.filter_tabs_font_weight }};
+    --filter-checkbox-border-style: {{ block_settings.filter_tabs_border_thickness }}px solid {{ block_settings.filter_tabs_color }};
+    --filter-checkbox-border-radius: {{ block_settings.filter_tabs_border_radius }}px;
+    --filter-checkbox-padding: {{ block_settings.filter_tabs_padding }}px;
+    --filter-checkbox-checked-color: {{ block_settings.filter_tabs_selected_color }};
+    --filter-checkbox-checked-background-color: {{ block_settings.filter_tabs_selected_background_color }};
+    --pills-tab-color: black;
+    --pills-tab-font-weight: {{ block_settings.filter_tabs_font_weight }};
+    --pills-tab-padding: {{ block_settings.filter_tabs_padding }}px;
+    --pills-tab-border-style: {{ block_settings.filter_tabs_border_thickness }}px solid lightgray;
+    --pills-tab-border-radius: {{ block_settings.filter_tabs_border_radius }}px;
+  {% endcapture %}
+{% endif %}
 
 {% if block_settings.enable_filtering or block_settings.enable_sorting or block_settings.enable_grid_density %}
   {% if block_settings.filter_style == 'vertical' %}
     {% # These elements are always rendered in the horizontal bar that's why we apply the .facets--horizontal class %}
     <div
       class="facets facets--horizontal facets-controls-wrapper spacing-style"
-      style="{% render 'spacing-style', settings: block_settings %}{% if block_settings.text_label_case == 'uppercase' %} --facet-label-transform: uppercase;{% endif %}"
+      style="{% render 'spacing-style', settings: block_settings %}{% if block_settings.text_label_case == 'uppercase' %} --facet-label-transform: uppercase;{% endif %} --facet-label-font-weight: {% if block_settings.text_label_bold == true %}bold{% else %}inherit{% endif %};"
     >
       {% if block_settings.enable_filtering %}
         <h4 class="facets--filters-title">{{ 'content.filters' | t }}</h4>
@@ -125,12 +148,13 @@
       {{ facets_margin_style }}
       --facets-inner-padding-block: {{ block_settings.padding-block-start }}px {{ block_settings.padding-block-end }}px;
       --facets-inner-padding-inline: var(--padding-lg);
+      {{ new_filter_checkbox_css }}
     "
     {{ block.shopify_attributes }}
   >
     <div
       class="facets facets--{{ block_settings.filter_style }} spacing-style"
-      style="{% render 'spacing-style', settings: block_settings %}{% if block_settings.text_label_case == 'uppercase' %} --facet-label-transform: uppercase;{% endif %}"
+      style="{% render 'spacing-style', settings: block_settings %}{% if block_settings.text_label_case == 'uppercase' %} --facet-label-transform: uppercase;{% endif %} --facet-label-font-weight: {% if block_settings.text_label_bold == true %}bold{% else %}inherit{% endif %};"
       aria-label="{{ 'accessibility.filters' | t }}"
     >
       <facets-form-component
@@ -149,7 +173,8 @@
               filters: filters,
               results_url: results_url,
               show_filter_label: block_settings.show_filter_label,
-              should_show_clear_all: true
+              should_show_clear_all: true,
+              should_use_new_pills_style: should_use_new_checkbox_style
             %}
 
             {% if block_settings.enable_filtering %}
@@ -186,7 +211,7 @@
                         else
                           assign should_render_clear = false
                         endif
-                        render 'list-filter', filter: filter, filter_style: block_settings.filter_style, active_value_count: active_value_count, should_render_clear: should_render_clear, show_swatch_label: block_settings.show_swatch_label, sectionId: section.id
+                        render 'list-filter', filter: filter, filter_style: block_settings.filter_style, active_value_count: active_value_count, should_render_clear: should_render_clear, show_swatch_label: block_settings.show_swatch_label, sectionId: section.id, should_use_new_checkbox_style: should_use_new_checkbox_style
                       %}
                   {% endcase %}
                 {%- endfor -%}
@@ -195,10 +220,16 @@
               <div class="facets__filters-wrapper">
                 {% if block_settings.filter_style == 'horizontal' %}
                   {% liquid
-                    assign more_attributes = 'on:click="#filters-drawer/showDialog"'
-                    if block_settings.text_label_case == 'uppercase'
-                      assign more_attributes = more_attributes | append: ' style="--text-transform: uppercase;"'
+                    assign more_attributes = 'on:click="#filters-drawer/showDialog" style="--facet-label-font-weight:"'
+                    if block_settings.text_label_bold == true
+                      assign more_attributes = more_attributes | append: 'bold;'
+                    else
+                      assign more_attributes = more_attributes | append: 'inherit;'
                     endif
+                    if block_settings.text_label_case == 'uppercase'
+                      assign more_attributes = more_attributes | append: ' --text-transform: uppercase;'
+                    endif
+                    assign more_attributes = more_attributes | append: '"'
                   %}
                   {% render 'overflow-list',
                     class: 'facets__overflow-list',
@@ -320,9 +351,21 @@
 {% endif %}
 
 {% if block_settings.enable_filtering %}
+  {% assign form_component = 'FacetFiltersFormComponent--' | append: section.id | append: '-overflow' %}
+  <div class="related-facets-toggle" style="{{ new_filter_checkbox_css }}">
+    {% render 'filter-remove-buttons',
+      filters: filters,
+      results_url: results_url,
+      show_filter_label: block_settings.show_filter_label,
+      should_show_clear_all: true,
+      should_use_new_pills_style: should_use_new_checkbox_style,
+      form_component: form_component
+    %}
+  </div>
   <dialog-component
     id="filters-drawer"
     class="facets-block-wrapper facets-block-wrapper--vertical facets-block-wrapper--drawer color-{{ settings.drawer_color_scheme }}"
+    style="{{ new_filter_checkbox_css }}"
   >
     <dialog
       ref="dialog"
@@ -330,7 +373,6 @@
       style="{% render 'spacing-style', settings: block_settings %}"
       scroll-lock
     >
-      {% assign form_component = 'FacetFiltersFormComponent--' | append: section.id | append: '-overflow' %}
 
       <facets-form-component
         class="facets__form-wrapper"
@@ -377,12 +419,15 @@
           </div>
 
           {% if block_settings.enable_filtering %}
+            {% comment %}
             {% render 'filter-remove-buttons',
               filters: filters,
               results_url: results_url,
               show_filter_label: block_settings.show_filter_label,
-              should_show_clear_all: false
+              should_show_clear_all: false,
+              should_use_new_pills_style: should_use_new_checkbox_style
             %}
+            {% endcomment %}
 
             <div class="facets__filters-wrapper">
               {% assign total_active_values = 0 %}
@@ -413,7 +458,7 @@
 
                       assign active_value_count = filter.active_values | size
                       assign total_active_values = total_active_values | plus: active_value_count
-                      render 'list-filter', filter: filter, filter_style: 'vertical', active_value_count: active_value_count, should_render_clear: false, autofocus: should_autofocus, in_drawer: true, sectionId: section.id
+                      render 'list-filter', filter: filter, filter_style: 'vertical', active_value_count: active_value_count, should_render_clear: false, autofocus: should_autofocus, in_drawer: true, sectionId: section.id, should_use_new_checkbox_style: should_use_new_checkbox_style
                     %}
                 {% endcase %}
               {%- endfor -%}
@@ -782,6 +827,18 @@
     }
   }
 
+  .facets__inputs-wrapper:not(:has(.facets__inputs-list-new-style)),
+  .facets__inputs-wrapper .facets__inputs-list-new-style {
+    display: flex;
+    gap: var(--gap-sm);
+    flex-direction: row;
+    flex-wrap: wrap;
+
+    @media screen and (min-width: 750px) {
+      gap: var(--gap-xs);
+    }
+  }
+
   @media screen and (min-width: 750px) {
     .facets--vertical .facets__inputs-wrapper .facets__inputs-list--swatches {
       gap: var(--gap-sm);
@@ -932,6 +989,7 @@
   .facets__label,
   .products-count-wrapper {
     text-transform: var(--facet-label-transform);
+    font-weight: var(--facet-label-font-weight);
   }
 
   .clear-filter {
@@ -1102,6 +1160,133 @@
     },
     {
       "type": "select",
+      "id": "filter_checkbox_style",
+      "label": "t:settings.checkbox_style",
+      "options": [
+        { "value": "tickboxes", "label": "t:options.tickboxes" },
+        { "value": "tabs", "label": "t:options.tabs" }
+      ],
+      "default": "tickboxes",
+      "visible_if": "{{ block.settings.enable_filtering == true and block.settings.filter_style == 'vertical' }}"
+    },
+    {
+      "type": "header",
+      "content": "t:content.filter_tabs_format",
+      "visible_if": "{{ block.settings.enable_filtering == true and block.settings.filter_style == 'vertical' and block.settings.filter_checkbox_style == 'tabs' }}"
+    },
+    {
+      "type": "color",
+      "id": "filter_tabs_color",
+      "label": "t:settings.default",
+      "default": "#ffffff",
+      "visible_if": "{{ block.settings.enable_filtering == true and block.settings.filter_style == 'vertical' and block.settings.filter_checkbox_style == 'tabs' }}"
+    },
+    {
+      "type": "range",
+      "id": "filter_tabs_font_size",
+      "label": "t:settings.size",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "default": 10,
+      "visible_if": "{{ block.settings.enable_filtering == true and block.settings.filter_style == 'vertical' and block.settings.filter_checkbox_style == 'tabs' }}"
+    },
+    {
+      "type": "select",
+      "id": "filter_tabs_font_weight",
+      "label": "t:settings.weight",
+      "options": [
+        {
+          "value": "100",
+          "label": "Thin (Hairline)"
+        },
+        {
+          "value": "200",
+          "label": "Extra Light (Ultra Light)"
+        },
+        {
+          "value": "300",
+          "label": "Light"
+        },
+        {
+          "value": "400",
+          "label": "Normal (Regular)"
+        },
+        {
+          "value": "500",
+          "label": "Medium"
+        },
+        {
+          "value": "600",
+          "label": "Semi Bold (Demi Bold)"
+        },
+        {
+          "value": "700",
+          "label": "Bold"
+        },
+        {
+          "value": "800",
+          "label": "Extra Bold (Ultra Bold)"
+        },
+        {
+          "value": "900",
+          "label": "Black (Heavy)"
+        }
+      ],
+      "default": "500",
+      "visible_if": "{{ block.settings.enable_filtering == true and block.settings.filter_style == 'vertical' and block.settings.filter_checkbox_style == 'tabs' }}"
+    },
+    {
+      "type": "range",
+      "id": "filter_tabs_padding",
+      "label": "t:settings.padding",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "default": 10,
+      "visible_if": "{{ block.settings.enable_filtering == true and block.settings.filter_style == 'vertical' and block.settings.filter_checkbox_style == 'tabs' }}"
+    },
+    {
+      "type": "color",
+      "id": "filter_tabs_selected_color",
+      "label": "t:settings.selected_color",
+      "default": "#ffffff",
+      "visible_if": "{{ block.settings.enable_filtering == true and block.settings.filter_style == 'vertical' and block.settings.filter_checkbox_style == 'tabs' }}"
+    },
+    {
+      "type": "color",
+      "id": "filter_tabs_selected_background_color",
+      "label": "t:settings.selected_backbround_color",
+      "visible_if": "{{ block.settings.enable_filtering == true and block.settings.filter_style == 'vertical' and block.settings.filter_checkbox_style == 'tabs' }}"
+    },
+    {
+      "type": "range",
+      "id": "filter_tabs_border_thickness",
+      "label": "t:settings.border_thickness",
+      "min": 1,
+      "max": 10,
+      "step": 1,
+      "unit": "px",
+      "default": 2,
+      "visible_if": "{{ block.settings.enable_filtering == true and block.settings.filter_style == 'vertical' and block.settings.filter_checkbox_style == 'tabs' }}"
+    },
+    {
+      "type": "range",
+      "id": "filter_tabs_border_radius",
+      "label": "t:settings.border_radius",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 0,
+      "visible_if": "{{ block.settings.enable_filtering == true and block.settings.filter_style == 'vertical' and block.settings.filter_checkbox_style == 'tabs' }}"
+    },
+    {
+      "type": "header",
+      "content": "t:content.filter_label_format"
+    },
+    {
+      "type": "select",
       "id": "text_label_case",
       "label": "t:settings.text_label_case",
       "options": [
@@ -1115,6 +1300,13 @@
         }
       ],
       "default": "default",
+      "visible_if": "{{ block.settings.enable_filtering == true }}"
+    },
+    {
+      "type": "checkbox",
+      "id": "text_label_bold",
+      "label": "t:settings.text_label_bold",
+      "default": false,
       "visible_if": "{{ block.settings.enable_filtering == true }}"
     },
     {

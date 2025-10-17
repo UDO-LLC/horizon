@@ -146,7 +146,9 @@
     "visibility": "Visibility",
     "width": "Width",
     "width_is_automatically_optimized": "Width is automatically optimized for mobile.",
-    "app_required_for_ratings": "An app is required for product ratings. [Learn more](https://help.shopify.com/manual/apps)"
+    "app_required_for_ratings": "An app is required for product ratings. [Learn more](https://help.shopify.com/manual/apps)",
+    "filter_label_format": "Filter label format",
+    "filter_tabs_format": "Filter tabs format"
   },
   "html_defaults": {
     "share_information_about_your": "<p>Share information about your brand with your customers. Describe a product, make announcements, or welcome customers to your store.</p>"
@@ -425,6 +427,8 @@
     "caption": "Caption",
     "caret": "Caret",
     "carousel": "Carousel",
+    "tickboxes": "Tickboxes",
+    "tabs": "Tabs",
     // Icon selection option for carrot graphic
     "carrot": "Carrot",
     // Alignment option to center content horizontally or vertically
@@ -717,6 +721,8 @@
     "background_overlay": "Background overlay",
     "badge_corner_radius": "Corner radius",
     "background_media": "Background media",
+    "selected_backbround_color": "Selected background color",
+    "selected_color": "Selected color",
     "badge_position": "Position on cards",
     // Color scheme setting for sale badges on product cards
     "badge_sale_color_scheme": "Sale",
@@ -844,6 +850,7 @@
     "extra_small": "Extra small",
     "favicon": "Favicon",
     "filter_style": "Filter style",
+    "checkbox_style": "Checkbox style",
     "first_row_media_position": "First row media position",
     "fixed_height": "Pixel height",
     "fixed_width": "Pixel width",
@@ -1084,6 +1091,7 @@
     "text_case": "Case",
     "text_hierarchy": "Text hierarchy",
     "text_label_case": "Text label case",
+    "text_label_bold": "Text label bold",
     "text_presets": "Text presets",
     // Pixel width setting for borders, dividers, or lines
     "thickness": "Thickness",

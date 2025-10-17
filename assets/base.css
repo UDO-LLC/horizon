@@ -2751,6 +2751,25 @@ product-price.text-block:is(.h1, .h2, .h3, .h4, .h5, .h6) > *:not(.tax-note) {
   }
 }
 
+.pills__tab {
+  color: var(--pills-tab-color, black);
+  font-weight: var(--pills-tab-font-weight, bold);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--gap-xs);
+  padding: var(--pills-tab-padding);
+  border: var(--pills-tab-border-style);
+  border-radius: var(--pills-tab-border-radius);
+  cursor: pointer;
+  background-color: var(--pills-tab-background-color, --color-background);
+  transition: background-color var(--animation-speed) var(--animation-easing);
+
+  &:hover {
+    opacity: 0.8;
+  }
+}
+
 /* Fly to cart animation */
 fly-to-cart {
   position: fixed;
