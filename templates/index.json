@@ -203,6 +203,20 @@
               },
               "blocks": {}
             },
+            "badge": {
+              "type": "_featured-product-badge",
+              "name": "t:names.product_badge",
+              "settings": {
+                "product_badge": "Personalized",
+                "font_size": "1.5rem",
+                "font_size_mobile": "1.125rem",
+                "text_color": "#ffffff",
+                "background_color": "#eb7a57",
+                "border_radius": 5,
+                "product_badge_on_tags": "custom-photo-kit,wonder-kit,custom-photo-kits,wonder-kits"
+              },
+              "blocks": {}
+            },
             "product_title_YXxMTj": {
               "type": "product-title",
               "name": "t:names.product_title",
@@ -254,6 +268,7 @@
           },
           "block_order": [
             "product_card_gallery_677WP3",
+            "badge",
             "product_title_YXxMTj",
             "price_JQzVV4"
           ]

@@ -9,7 +9,7 @@
  */
 {
   "type": "header",
-  "name": "Header",
+  "name": "t:names.header",
   "sections": {
     "header_announcements_9jGBFp": {
       "type": "header-announcements",

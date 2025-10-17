@@ -65,10 +65,7 @@
           "blocks": {}
         }
       },
-      "block_order": [
-        "title",
-        "content"
-      ],
+      "block_order": ["title", "content"],
       "settings": {
         "content_direction": "column",
         "gap": 32,
@@ -112,9 +109,7 @@
           "block_order": []
         }
       },
-      "block_order": [
-        "contact_form_UwiCkQ"
-      ],
+      "block_order": ["contact_form_UwiCkQ"],
       "name": "t:names.contact_form",
       "settings": {
         "content_direction": "column",
@@ -145,8 +140,5 @@
       }
     }
   },
-  "order": [
-    "main",
-    "form"
-  ]
+  "order": ["main", "form"]
 }

@@ -78,7 +78,7 @@ declare global {
       url: string;
       cdnUrl: string;
   }
-  
+
   interface UdoPaintsEditor {
     /**
      * Called when a product is added to cart
@@ -156,5 +156,10 @@ declare global {
     onError: UdoPaintsEditor['onError'];
     uploadImage: UdoPaintsEditor['uploadImage'];
     onStateChange: UdoPaintsEditor['onStateChange'];
+  }
+
+  // Device Memory API - https://developer.mozilla.org/en-US/docs/Web/API/Navigator/deviceMemory
+  interface Navigator {
+    readonly deviceMemory?: number;
   }
 }
