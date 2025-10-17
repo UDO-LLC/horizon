@@ -24,6 +24,7 @@
             "slideshow_controls_style": "thumbnails",
             "slideshow_mobile_controls_style": "thumbnails",
             "thumbnail_position": "left",
+            "mobile_thumbnail_position": "bottom",
             "thumbnail_width": 70,
             "thumbnail_selected_border_color": "#eb7a57",
             "thumbnail_selected_border_thinkness": 3,
