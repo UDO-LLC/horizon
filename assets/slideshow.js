@@ -24,7 +24,10 @@ const SLIDE_VISIBLITY_THRESHOLD = 0.7;
  * @property {HTMLElement} slideshowContainer
  * @property {HTMLElement[]} [slides]
  * @property {HTMLElement} [current]
+ * @property {HTMLElement} [thumbnailsContainer]
  * @property {HTMLElement[]} [thumbnails]
+ * @property {HTMLElement[]} [thumbnails_on_desktop]
+ * @property {HTMLElement[]} [thumbnails_on_mobile]
  * @property {HTMLElement[]} [dots]
  * @property {HTMLButtonElement} [previous]
  * @property {HTMLButtonElement} [next]
@@ -334,13 +337,13 @@ export class Slideshow extends Component {
    * @type {number}
    */
   set current(value) {
-    const { current, thumbnails, dots, slides, previous, next } = this.refs;
+    const { current, thumbnails, thumbnails_on_desktop, thumbnails_on_mobile,  dots, slides, previous, next } = this.refs;
 
     this.#current = value;
 
     if (current) current.textContent = `${value + 1}`;
 
-    for (const controls of [thumbnails, dots]) {
+    for (const controls of [thumbnails, dots, thumbnails_on_desktop, thumbnails_on_mobile]) {
       controls?.forEach((el, i) => el.setAttribute('aria-selected', `${i === value}`));
     }
 
@@ -389,6 +392,7 @@ export class Slideshow extends Component {
   set disabled(value) {
     this.setAttribute('disabled', String(value));
   }
+
   /**
    * Whether the slideshow is disabled.
    * @type {boolean}

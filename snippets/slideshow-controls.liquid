@@ -14,6 +14,7 @@
   @param {string} [aspect_ratio] - The aspect ratio of thumbnails, if applicable. defaults to 'adapt'
   @param {string} [class] - Additional classes to apply to the controls
   @param {boolean} [secondary] - Whether the controls are secondary
+  @param {string} [controls_show_on] - { 'desktop' | 'mobile' } Where the controls will be shown
 
   @example
   {%- render 'slideshow-controls', style: 'dots', item_count: 10 -%}
@@ -108,7 +109,11 @@
               aria-label="{{ 'accessibility.slide_status' | t: index: forloop.index, length: forloop.length }}"
               on:click="/select/{{ forloop.index0 }}"
               style="--aspect-ratio: {% if aspect_ratio == 'adapt' %}{{ media.preview_image.aspect_ratio | default: 1.0 }}{% else %}{{ aspect_ratio }}{% endif %};"
-              ref="thumbnails[]"
+              {% if controls_show_on != blank %}
+                ref="thumbnails_on_{{ controls_show_on }}[]"
+              {% else %}
+                ref="thumbnails[]"
+              {% endif %}
               {% if forloop.first %}
                 aria-selected="true"
               {% endif %}
