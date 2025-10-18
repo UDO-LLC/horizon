@@ -445,7 +445,8 @@
           thumbnails: sorted_media,
           controls_on_media: controls_on_media,
           pagination_position: pagination_position,
-          aspect_ratio: block_settings.aspect_ratio
+          aspect_ratio: block_settings.aspect_ratio,
+          controls_show_on: 'desktop'
         -%}
       {% endif %}
 
@@ -457,7 +458,8 @@
           thumbnails: sorted_media,
           controls_on_media: mobile_controls_on_media,
           pagination_position: mobile_pagination_position,
-          aspect_ratio: block_settings.aspect_ratio
+          aspect_ratio: block_settings.aspect_ratio,
+          controls_show_on: 'mobile'
         -%}
       {% endif %}
     {% endcapture %}
