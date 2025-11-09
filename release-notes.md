@@ -1,34 +1,29 @@
-# Release Notes - Version 3.0.0
+# Release Notes - Version 3.1.0
 
-This release introduces performance improvements, creates standalone sections for the logo and footer utilities, and simplifies settings all around the theme, along with bugfixing.
+This release introduces the ability to add mobile-specific media in the Hero section. It also includes several Safari bug fixes, and improved handling of transparent headers.
 
 ## What's Changed
 
 ### Added
 
-- [Cart] Added empty cart button link setting
-- [Footer] Added footer utilities section
-- [Footer] Added logo section
+- [Hero section] Set custom mobile media and layout settings
 
 ### Changed
 
-- [Footer] Simplified settings
-- [Cart] Allowed horizontal accelerated checkout buttons
-- [Cart] Updated typography settings
-- [Header] Moved logo size controls to Theme settings
+- [Product] Quantity rules are shown on product pages
+- [Footer] Rename "Utilities" to "Policies and links"
+- [Product grid] Removed price from zoomed out grid view
+- [Filters] Filter count always shown in vertical filters
 
 ### Fixes and improvements
 
-- [Performance] Lowered the priority of font preloads in favor of more critical resources
-- [Performance] Improved image zoom transition performance on low power devices
-- [Menu] Improved long text support
-- [Menu] Improved settings organization and naming
-- [Hero] Fixed horizontal scroll caused by the marquee
-- [Header] Fixed transparent header positioning when announcement bars are present
-- [Cart drawer] Fixed quantity alignment in iOS devices
-- [Group] Fixed content alignment issues on smaller screens
-- [Product recommendations] Fixed error in Theme Editor when adding the block
-- [Marquee] Improved marquee speed across screen sizes
-- [Product card] Fixed incorrect variant image when filter was applied
-- [Theme settings] Removed unnecessary button text weight settings
-- [Email signup] Fixed input layout issues
+- [Featured product carousel] Fix starting position on mobile Safari
+- [Slideshows] Ensure slideshow control buttons are circular on Safari
+- [Accessibility] Add background color to skip links for better visibility
+- [Product page] Shop Pay Instalments messaging no longer inherits custom typography from price block
+- [Product page] "Constrain image heights to viewport" accounts for transparent headers
+- [Header] Announcement bar visibility fix when used with transparent headers
+- [Collection links section] Links stack vertically on mobile
+- [Marquee] Fixed disappearing text
+- [Footer] Fixed email signup button icon color
+- [Footer] Menu block respects group block's vertical layout on mobile
