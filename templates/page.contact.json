@@ -38,9 +38,36 @@
           },
           "blocks": {}
         },
+        "text_86rrFC": {
+          "type": "text",
+          "name": "t:names.text",
+          "settings": {
+            "text": "<p>Have a question or need help? We’re here to make sure your shopping experience is smooth and enjoyable. Whether it’s about your custom order, shipping, or anything else, feel free to reach out anytime.</p><p>Our support team is available Monday to Saturday, from 8 AM to 8 PM EST, and we typically respond within 24 hours.</p><p><strong>Email: </strong>support@udopaints.com<strong><br/>Mailing Address:</strong> 2020 N Academy Blvd, Ste 261 #3802, Colorado Springs, CO 80909, United States</p>",
+            "width": "100%",
+            "max_width": "normal",
+            "alignment": "center",
+            "type_preset": "rte",
+            "font": "var(--font-body--family)",
+            "font_size": "1rem",
+            "line_height": "normal",
+            "letter_spacing": "normal",
+            "case": "none",
+            "wrap": "pretty",
+            "color": "var(--color-foreground)",
+            "background": false,
+            "background_color": "#00000026",
+            "corner_radius": 0,
+            "padding-block-start": 0,
+            "padding-block-end": 0,
+            "padding-inline-start": 0,
+            "padding-inline-end": 0
+          },
+          "blocks": {}
+        },
         "content": {
           "type": "text",
           "name": "t:names.content",
+          "disabled": true,
           "settings": {
             "text": "{{ closest.page.content }}",
             "width": "100%",
@@ -65,7 +92,11 @@
           "blocks": {}
         }
       },
-      "block_order": ["title", "content"],
+      "block_order": [
+        "title",
+        "text_86rrFC",
+        "content"
+      ],
       "settings": {
         "content_direction": "column",
         "gap": 32,
@@ -81,7 +112,7 @@
           "type": "contact-form",
           "settings": {
             "width": "custom",
-            "custom_width": 50,
+            "custom_width": 60,
             "width_mobile": "custom",
             "custom_width_mobile": 100,
             "inherit_color_scheme": true,
@@ -107,9 +138,38 @@
             }
           },
           "block_order": []
+        },
+        "text_dpgNak": {
+          "type": "text",
+          "name": "t:names.text",
+          "settings": {
+            "text": "",
+            "width": "100%",
+            "max_width": "normal",
+            "alignment": "center",
+            "type_preset": "rte",
+            "font": "var(--font-body--family)",
+            "font_size": "1rem",
+            "line_height": "normal",
+            "letter_spacing": "normal",
+            "case": "none",
+            "wrap": "pretty",
+            "color": "var(--color-foreground)",
+            "background": false,
+            "background_color": "#00000026",
+            "corner_radius": 0,
+            "padding-block-start": 0,
+            "padding-block-end": 0,
+            "padding-inline-start": 0,
+            "padding-inline-end": 0
+          },
+          "blocks": {}
         }
       },
-      "block_order": ["contact_form_UwiCkQ"],
+      "block_order": [
+        "contact_form_UwiCkQ",
+        "text_dpgNak"
+      ],
       "name": "t:names.contact_form",
       "settings": {
         "content_direction": "column",
@@ -140,5 +200,8 @@
       }
     }
   },
-  "order": ["main", "form"]
+  "order": [
+    "main",
+    "form"
+  ]
 }

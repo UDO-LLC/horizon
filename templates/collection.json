@@ -116,7 +116,7 @@
             "filter_tabs_selected_color": "#d66f51",
             "filter_tabs_selected_background_color": "",
             "filter_tabs_border_thickness": 2,
-            "filter_tabs_border_radius": 5,
+            "filter_tabs_border_radius": 10,
             "text_label_case": "default",
             "text_label_bold": false,
             "show_swatch_label": false,
@@ -125,12 +125,12 @@
             "enable_grid_density": true,
             "inherit_color_scheme": true,
             "color_scheme": "",
-            "padding-block-start": 8,
-            "padding-block-end": 8,
+            "padding-block-start": 0,
+            "padding-block-end": 0,
             "padding-inline-start": 0,
             "padding-inline-end": 0,
             "facets_margin_bottom": 8,
-            "facets_margin_right": 20
+            "facets_margin_right": 10
           },
           "blocks": {}
         },

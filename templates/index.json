@@ -27,10 +27,10 @@
             "letter_spacing": "normal",
             "case": "none",
             "wrap": "pretty",
-            "color": "var(--color-foreground)",
-            "background": false,
-            "background_color": "#00000026",
-            "corner_radius": 0,
+            "color": "var(--color-foreground-heading)",
+            "background": true,
+            "background_color": "#f5f5f5",
+            "corner_radius": 10,
             "padding-block-start": 0,
             "padding-block-end": 0,
             "padding-inline-start": 0,
@@ -41,11 +41,12 @@
         "button_H9gpTf": {
           "type": "button",
           "name": "t:names.button",
+          "disabled": true,
           "settings": {
             "label": "Shop now",
             "link": "shopify://collections/all",
             "open_in_new_tab": false,
-            "style_class": "button-secondary",
+            "style_class": "button",
             "width": "fit-content",
             "custom_width": 100,
             "width_mobile": "fit-content",
@@ -61,7 +62,9 @@
       "name": "t:names.hero",
       "settings": {
         "media_type_1": "image",
+        "image_1": "shopify://shop_images/a414c6a1-a55b-40ec-8a67-2dc22e3cc5ad-Winter_Village.jpg",
         "media_type_2": "image",
+        "image_2": "shopify://shop_images/8e4a885e-81fa-4363-af30-83327bb2f3d7-Winter_Embrace_PBN.png",
         "link": "",
         "open_in_new_tab": false,
         "content_direction": "column",
@@ -75,13 +78,13 @@
         "section_width": "page-width",
         "section_height": "medium",
         "section_height_custom": 50,
-        "color_scheme": "scheme-1",
-        "toggle_overlay": true,
-        "overlay_color": "#00000014",
+        "color_scheme": "scheme-d1fc12f1-42e1-4968-ba33-4e0e6150391f",
+        "toggle_overlay": false,
+        "overlay_color": "#0000000f",
         "overlay_style": "gradient",
-        "gradient_direction": "to bottom",
+        "gradient_direction": "to top",
         "blurred_reflection": false,
-        "reflection_opacity": 75,
+        "reflection_opacity": 10,
         "padding-block-start": 100,
         "padding-block-end": 48
       }
@@ -99,7 +102,7 @@
             "horizontal_alignment": "space-between",
             "vertical_alignment": "center",
             "align_baseline": false,
-            "horizontal_alignment_flex_direction_column": "center",
+            "horizontal_alignment_flex_direction_column": "flex-start",
             "vertical_alignment_flex_direction_column": "center",
             "gap": 12,
             "width": "fill",
@@ -131,7 +134,7 @@
                 "width": "fit-content",
                 "max_width": "normal",
                 "alignment": "left",
-                "type_preset": "h2",
+                "type_preset": "h3",
                 "font": "var(--font-body--family)",
                 "font_size": "1rem",
                 "line_height": "normal",
@@ -153,7 +156,7 @@
               "type": "_product-list-button",
               "name": "t:names.product_list_button",
               "settings": {
-                "label": "View all",
+                "label": "Explore All",
                 "open_in_new_tab": false,
                 "style_class": "link",
                 "width": "fit-content",
@@ -224,7 +227,7 @@
                 "width": "100%",
                 "max_width": "normal",
                 "alignment": "center",
-                "type_preset": "h4",
+                "type_preset": "h5",
                 "font": "var(--font-body--family)",
                 "font_size": "1rem",
                 "line_height": "normal",
@@ -276,7 +279,7 @@
       },
       "name": "Featured collection",
       "settings": {
-        "collection": "all",
+        "collection": "paint-by-numbers-kits",
         "layout_type": "carousel",
         "carousel_on_mobile": true,
         "max_products": 16,
@@ -285,12 +288,12 @@
         "mobile_card_size": "60cqw",
         "columns_gap": 8,
         "rows_gap": 24,
-        "icons_style": "arrow",
+        "icons_style": "chevron",
         "icons_shape": "none",
         "section_width": "page-width",
         "horizontal_alignment": "flex-start",
         "gap": 28,
-        "color_scheme": "scheme-1",
+        "color_scheme": "scheme-31ff5f2d-b5d2-4322-8fb7-fc9940c71b16",
         "padding-block-start": 48,
         "padding-block-end": 48
       }
@@ -300,23 +303,33 @@
       "blocks": {
         "review_image_7LzpFF": {
           "type": "review_image",
-          "settings": {}
+          "settings": {
+            "image": "shopify://shop_images/cb88cf81-083c-4f81-92a7-4faf3e59cb66-Winter_Retreat.jpg"
+          }
         },
         "review_image_8gqAhW": {
           "type": "review_image",
-          "settings": {}
+          "settings": {
+            "image": "shopify://shop_images/a414c6a1-a55b-40ec-8a67-2dc22e3cc5ad-Winter_Village.jpg"
+          }
         },
         "review_image_cLhm4y": {
           "type": "review_image",
-          "settings": {}
+          "settings": {
+            "image": "shopify://shop_images/Stained-GlassTreePaintbyNumbersKit.jpg"
+          }
         },
         "review_image_8iWW6m": {
           "type": "review_image",
-          "settings": {}
+          "settings": {
+            "image": "shopify://shop_images/9b92140d-c39d-416a-bcbe-be26a8f57c6b-Santa_s_Celebration.jpg"
+          }
         },
         "review_image_xtgffH": {
           "type": "review_image",
-          "settings": {}
+          "settings": {
+            "image": "shopify://shop_images/cb88cf81-083c-4f81-92a7-4faf3e59cb66-Winter_Retreat.jpg"
+          }
         },
         "review_image_VYNaer": {
           "type": "review_image",
@@ -398,9 +411,17 @@
           "type": "review_image",
           "settings": {}
         },
+        "review_image_DEFbPd": {
+          "type": "review_image",
+          "settings": {
+            "image": "shopify://shop_images/8e4a885e-81fa-4363-af30-83327bb2f3d7-Winter_Embrace_PBN.png"
+          }
+        },
         "review_image_NajtXg": {
           "type": "review_image",
-          "settings": {}
+          "settings": {
+            "image": "shopify://shop_images/d04b1f4a-1a6a-485c-96dc-2b8181ff3ae4-Winter_Snowman_Fun.jpg"
+          }
         },
         "review_image_KTGtUt": {
           "type": "review_image",
@@ -437,18 +458,19 @@
         "review_image_WLUzF9",
         "review_image_DJdyDG",
         "review_image_RKjygV",
+        "review_image_DEFbPd",
         "review_image_NajtXg",
         "review_image_KTGtUt",
         "review_image_ztzLJm"
       ],
       "name": "t:names.review_marquee",
       "settings": {
-        "header_content": "<p>Discover What Makes Us Special</p>",
-        "header_font_size": 20,
+        "header_content": "<h2>Join 5.000+ Happy Artists</h2>",
+        "header_font_size": 18,
         "header_color": "#222222",
-        "description_content": "<p>Every review tells a story of success. Discover why our customers choose us and how our products have made a meaningful difference in their lives. From improved skills to completed masterpieces, these authentic testimonials show the real impact of choosing quality and craftsmanship.</p>",
-        "description_font_size": 16,
-        "description_color": "#555555",
+        "description_content": "<p>Discover how</p>",
+        "description_font_size": 14,
+        "description_color": "#222222",
         "text_align": "center",
         "image_height": 270,
         "image_height_mobile": 140,
@@ -456,8 +478,8 @@
         "scroll_speed": 55,
         "pause_on_hover": false,
         "enable_hover_effects": false,
-        "padding-block-start": 5,
-        "padding-block-end": 5
+        "padding-block-start": 0,
+        "padding-block-end": 0
       }
     }
   },

@@ -147,7 +147,7 @@
                   },
                   "blocks": {}
                 },
-                "loox_reviews_loox_rating_b4WkVV": {
+                "loox_reviews_loox_rating_xQxFFe": {
                   "type": "shopify://apps/loox-reviews/blocks/loox-rating/5c3b337f-fd14-4df5-b1d6-80ec13e6e28e",
                   "settings": {
                     "contentSize": 14,
@@ -187,7 +187,7 @@
               },
               "block_order": [
                 "text_xrnftG",
-                "loox_reviews_loox_rating_b4WkVV",
+                "loox_reviews_loox_rating_xQxFFe",
                 "price_tVjtKg"
               ]
             },
@@ -202,33 +202,6 @@
                 "padding-block-end": 0
               },
               "blocks": {}
-            },
-            "udopaints_custom_app_product_image_kit_NMwfh7": {
-              "type": "shopify://apps/udopaints-custom-app/blocks/product-image-kit/11a13a2a-4466-4ec0-9028-8218a58685b6",
-              "settings": {
-                "title": "UdoPaints Design Preview",
-                "background_color": "",
-                "main_color": "#1e4157",
-                "control_button_text_classname": "text-white",
-                "preview_editor_control_button_background_color": "",
-                "preview_editor_control_button_text_classname": "",
-                "show_preview_palette_control_button": true,
-                "preview_palette_colors_control_button_background_color": "#e6e6e6",
-                "preview_palette_colors_control_button_text_classname": "text-black",
-                "default_palette_colors": "24",
-                "privacy_url": "shopify://policies/privacy-policy",
-                "privacy_container": "main#MainContent",
-                "backend_url": "https://udopaints-custom-app-prod.vercel.app",
-                "shopify_file_cdn_prefix": "https://cdn.shopify.com/s/files/1/0916/7637/7451/files",
-                "preview_editor_container_reference_selector_string": "fieldset.variant-option[data-option-name=\"orientation\"]",
-                "preview_editor_container_insert_mode": "after",
-                "portrait_orientation_selector_string": "fieldset.variant-option[data-option-name=\"orientation\"] input[type=\"radio\"][data-handle=\"portrait\"]",
-                "landscape_orientation_selector_string": "fieldset.variant-option[data-option-name=\"orientation\"] input[type=\"radio\"][data-handle=\"landscape\"]",
-                "preview_palette_colors_container_selector_string": "form.variant-picker__form",
-                "preview_palette_colors_button_position": "static",
-                "debug_mode": false,
-                "debug_wonder_kit_mode": false
-              }
             },
             "variant_picker_R3rGDr": {
               "type": "variant-picker",
@@ -246,7 +219,7 @@
                 "rolled_canvas_format_value_description": "",
                 "rolled_canvas_format_icon": "shopify://shop_images/rolled-kit.png",
                 "stretched_canvas_format_value": "Full Kit - Framed",
-                "stretched_canvas_format_value_description": "✅ Ready to paint and hang\n✅ No assembly required\n⭐ 40% cheaper than local framing",
+                "stretched_canvas_format_value_description": "🖼️ Ready to paint and hang\n😌 No assembly required\n⭐ 40% cheaper than local framing",
                 "stretched_canvas_format_icon": "shopify://shop_images/framed-canvas.png",
                 "number_of_palette_colors_name": "Color Palette",
                 "palette_colors_24_value": "24 Colors",
@@ -365,7 +338,7 @@
                   "type": "_accordion-row",
                   "settings": {
                     "heading": "Product Description",
-                    "open_by_default": false,
+                    "open_by_default": true,
                     "icon": "none",
                     "width": 20
                   },
@@ -491,7 +464,6 @@
           "block_order": [
             "group_icgrde",
             "divider_VJhene",
-            "udopaints_custom_app_product_image_kit_NMwfh7",
             "variant_picker_R3rGDr",
             "custom_liquid_jFmVYj_meld",
             "upsell_products_block",

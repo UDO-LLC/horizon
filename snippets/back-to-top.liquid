@@ -1,0 +1,109 @@
+<!-- Back to Top -->
+<div id="back-to-top" class="back-to-top back-to-top--edge" hidden>
+  <button class="back-to-top__btn" type="button" aria-label="Back to top">
+    <svg class="back-to-top__icon" width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+      <path d="M6.7 14.3a1 1 0 0 1 0-1.4l4.6-4.6a1 1 0 0 1 1.4 0l4.6 4.6a1 1 0 1 1-1.4 1.4L12 10.41l-3.9 3.89a1 1 0 0 1-1.4 0Z" fill="currentColor"/>
+    </svg>
+  </button>
+</div>
+
+<style>
+  .back-to-top[hidden]{display:none !important;}
+
+  .back-to-top{
+    position:fixed;
+    right:0;                        /* flush with screen edge */
+    bottom:calc(env(safe-area-inset-bottom, 0px) + 16px);
+    z-index:9999;
+  }
+  @media (min-width:768px){
+    .back-to-top{ bottom:calc(env(safe-area-inset-bottom, 0px) + 24px); }
+  }
+
+  /* Edge hugging pill: round on the left, flat on the right */
+.back-to-top--edge .back-to-top__btn {
+  width: 56px;
+  height: 40px;
+  border-radius: 9999px 0 0 9999px;
+  background: transparent;           /* completely see-through */
+  backdrop-filter: none;             /* removes blur */
+  -webkit-backdrop-filter: none;
+  color: #111;
+  border: 1px solid rgba(0,0,0,0.05); /* optional subtle border */
+  outline: 0;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding-left: 14px;
+  padding-right: 0;
+
+  /* lighter, tighter shadow */
+  box-shadow:
+    -3px 4px 8px rgba(37, 37, 37, 0.30),
+    -1px 2px 4px rgba(37, 37, 37, 0.30);
+
+  transition: transform 0.15s ease, box-shadow 0.2s ease;
+}
+
+.back-to-top--edge .back-to-top__btn:hover {
+  transform: translateY(-2px);
+}
+
+.back-to-top--edge .back-to-top__btn:active {
+  transform: translateY(0);
+}
+
+.back-to-top__icon {
+  display: block;
+  width: 20px;
+  height: 20px;
+}
+
+  /* Lift slightly when footer is visible so it never collides */
+  .back-to-top--footer-near .back-to-top__btn{ transform:translate(-2px,-6px); }
+</style>
+
+<script>
+(() => {
+  const root = document.getElementById('back-to-top');
+  if (!root) return;
+
+  const btn = root.querySelector('.back-to-top__btn');
+  const prefersReduced = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+
+  btn.addEventListener('click', () => {
+    if (prefersReduced) window.scrollTo(0, 0);
+    else window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
+
+  // show or hide after scrolling some distance
+  let ticking = false;
+  const showAfter = 400;
+  const onScroll = () => {
+    if (ticking) return;
+    requestAnimationFrame(() => {
+      const y = window.scrollY || document.documentElement.scrollTop;
+      const shouldShow = y > showAfter;
+      if (shouldShow && root.hasAttribute('hidden')) root.removeAttribute('hidden');
+      if (!shouldShow && !root.hasAttribute('hidden')) root.setAttribute('hidden', '');
+      ticking = false;
+    });
+    ticking = true;
+  };
+  document.addEventListener('scroll', onScroll, { passive: true });
+  onScroll();
+
+  // avoid overlapping with footer
+  const footer = document.querySelector('footer');
+  if ('IntersectionObserver' in window && footer){
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach(e => {
+        if (e.isIntersecting) root.classList.add('back-to-top--footer-near');
+        else root.classList.remove('back-to-top--footer-near');
+      });
+    }, { rootMargin: '0px 0px -20% 0px' });
+    io.observe(footer);
+  }
+})();
+</script>

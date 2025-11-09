@@ -22,7 +22,15 @@
   assign remainder = total_images | modulo: image_rows
 %}
 
-<div class="review-marquee" style="{% render 'spacing-padding', settings: section.settings %}">
+<div 
+  class="review-marquee"
+  style="
+    padding-top: {{ section.settings['padding-block-start'] | default: 10 }}px;
+    padding-bottom: {{ section.settings['padding-block-end'] | default: 10 }}px;
+    {% render 'spacing-padding', settings: section.settings %}
+  "
+>
+  
   <div class="review-marquee__container">
     {% if header_content != blank or description_content != blank %}
       <div class="review-marquee__header" style="text-align: {{ text_align }};">

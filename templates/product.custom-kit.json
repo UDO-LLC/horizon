@@ -24,6 +24,7 @@
             "slideshow_controls_style": "thumbnails",
             "slideshow_mobile_controls_style": "thumbnails",
             "thumbnail_position": "left",
+            "mobile_thumbnail_position": "bottom",
             "thumbnail_width": 70,
             "thumbnail_selected_border_color": "#d66f51",
             "thumbnail_selected_border_thinkness": 2,
@@ -146,6 +147,21 @@
                   },
                   "blocks": {}
                 },
+                "loox_reviews_loox_rating_9TicYG": {
+                  "type": "shopify://apps/loox-reviews/blocks/loox-rating/5c3b337f-fd14-4df5-b1d6-80ec13e6e28e",
+                  "settings": {
+                    "contentSize": 14,
+                    "pattern": "",
+                    "hideText": false,
+                    "alignment": "",
+                    "layout": "",
+                    "textColor": "",
+                    "starColor": "",
+                    "showAllReviews": false,
+                    "looxOpenFloatingWidget": false,
+                    "emptyRatingWidget": false
+                  }
+                },
                 "price_tVjtKg": {
                   "type": "price",
                   "settings": {
@@ -171,6 +187,7 @@
               },
               "block_order": [
                 "text_xrnftG",
+                "loox_reviews_loox_rating_9TicYG",
                 "price_tVjtKg"
               ]
             },
@@ -681,11 +698,58 @@
         "padding-block-start": 0,
         "padding-block-end": 0
       }
+    },
+    "176232146254056dc2": {
+      "type": "_blocks",
+      "blocks": {
+        "loox_reviews_loox_dynamic_section_JeHAFU": {
+          "type": "shopify://apps/loox-reviews/blocks/loox-dynamic-section/5c3b337f-fd14-4df5-b1d6-80ec13e6e28e",
+          "settings": {
+            "only_photos": false,
+            "aggregated": false,
+            "limit": 20,
+            "hide_thumbnails": true,
+            "maxwidth": 1080,
+            "is_sample": true
+          }
+        }
+      },
+      "block_order": [
+        "loox_reviews_loox_dynamic_section_JeHAFU"
+      ],
+      "settings": {
+        "content_direction": "column",
+        "vertical_on_mobile": true,
+        "horizontal_alignment": "flex-start",
+        "vertical_alignment": "center",
+        "align_baseline": false,
+        "horizontal_alignment_flex_direction_column": "flex-start",
+        "vertical_alignment_flex_direction_column": "center",
+        "gap": 12,
+        "section_width": "page-width",
+        "section_height": "",
+        "section_height_custom": 50,
+        "color_scheme": "",
+        "background_media": "none",
+        "video_position": "cover",
+        "background_image_position": "cover",
+        "border": "none",
+        "border_width": 1,
+        "border_opacity": 100,
+        "border_radius": 0,
+        "toggle_overlay": false,
+        "overlay_color": "#00000026",
+        "overlay_style": "solid",
+        "gradient_direction": "to top",
+        "padding-block-start": 0,
+        "padding-block-end": 0
+      }
     }
   },
   "order": [
     "main",
     "product_recommendations_qggXJq",
-    "1754473074bc6df9ba"
+    "1754473074bc6df9ba",
+    "176232146254056dc2"
   ]
 }
