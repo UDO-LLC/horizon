@@ -120,6 +120,9 @@ export class Slideshow extends Component {
     if (this.#disabled || !this.refs.slides?.length) return;
     if (!this.#scroll) return;
 
+    // Store the actual current slide before any mutations
+    const currentSlide = this.slides?.[this.current];
+
     for (const slide of this.refs.slides) {
       if (slide.hasAttribute('reveal')) {
         slide.removeAttribute('reveal');
@@ -147,13 +150,14 @@ export class Slideshow extends Component {
     })();
 
     const { current } = this;
-
-    // Guard if invalid
-    if (requestedIndex === undefined || isNaN(requestedIndex) || requestedIndex === current) return;
-
     const { slides } = this;
 
-    if (!slides?.length) return;
+    // Guard checks: no slides, invalid index, or selecting the same slide
+    if (!slides?.length || requestedIndex === undefined || isNaN(requestedIndex)) return;
+
+    const requestedSlideElement = slides?.[requestedIndex];
+    if (currentSlide === requestedSlideElement) return;
+
     if (!this.infinite) requestedIndex = clamp(requestedIndex, 0, slides.length - 1);
 
     event?.preventDefault();
@@ -176,7 +180,6 @@ export class Slideshow extends Component {
       await this.#scroll.finished; // ensure we're not mid-scroll
 
       const targetSlide = slides[index];
-      const currentSlide = slides[current];
       if (!targetSlide || !currentSlide) return;
 
       // Create a placeholder in the original DOM position of targetSlide
@@ -475,16 +478,21 @@ export class Slideshow extends Component {
     scheduler.schedule(() => {
       let visibleSlidesAmount = 0;
       const initialSlideId = this.initialSlide?.getAttribute('slide-id');
-      if (this.initialSlideIndex !== 0 && initialSlideId) {
-        this.select({ id: initialSlideId }, undefined, { animate: false });
-        visibleSlidesAmount = 1;
-      } else {
-        visibleSlidesAmount = this.#updateVisibleSlides();
-        if (visibleSlidesAmount === 0) {
-          this.select(0, undefined, { animate: false });
+
+      // Wait for next frame to ensure layout is fully calculated before setting initial scroll position
+      // This prevents race conditions on Safari mobile when section_width is 'full-width'
+      requestAnimationFrame(() => {
+        if (this.initialSlideIndex !== 0 && initialSlideId) {
+          this.select({ id: initialSlideId }, undefined, { animate: false });
           visibleSlidesAmount = 1;
+        } else {
+          visibleSlidesAmount = this.#updateVisibleSlides();
+          if (visibleSlidesAmount === 0) {
+            this.select(0, undefined, { animate: false });
+            visibleSlidesAmount = 1;
+          }
         }
-      }
+      });
 
       this.#resizeObserver = new ResizeObserver(async () => {
         if (viewTransition.current) await viewTransition.current;

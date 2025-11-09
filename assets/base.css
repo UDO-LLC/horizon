@@ -596,6 +596,7 @@ p:empty {
   padding: var(--padding-lg) var(--padding-4xl);
   left: var(--margin-lg);
   top: var(--margin-lg);
+  background-color: var(--color-background);
   box-shadow: 0 0 0 var(--focus-outline-offset) var(--color-background);
 }
 
@@ -960,12 +961,14 @@ body:has(.header[transparent]) .content-for-layout > .shopify-section:first-chil
   margin-top: calc(var(--header-group-height) * -1);
 }
 
-body:has(.header[transparent]) #header-group > *:not(.header-section) {
-  z-index: 1;
-}
-
 body:has(.header[transparent]) #header-group > .header-section {
   z-index: var(--layer-sticky);
+}
+
+/* All other header group content should be beneath the floating header,
+but above the rest of the page content */
+body:has(.header[transparent]) #header-group > *:not(.header-section) {
+  z-index: calc(var(--layer-sticky) - 1);
 }
 
 /* Featured collection block */
@@ -1590,6 +1593,10 @@ media-gallery.media-gallery--grid .media-gallery__grid .product-media-container 
     --constrained-min-height: 500px;
   }
 
+  body:has(header-component[transparent]) .product-media-container.constrain-height {
+    --viewport-offset: 0px;
+  }
+
   .media-gallery--two-column .media-gallery__grid {
     grid-template-columns: repeat(2, 1fr);
   }
@@ -2116,6 +2123,7 @@ deferred-media[class] :is(.deferred-media__poster-button img, .deferred-media__p
 
 .tax-note.tax-note.tax-note {
   font-size: min(0.85em, var(--font-paragraph--size));
+  font-weight: var(--font-paragraph--weight);
   color: rgb(var(--color-foreground-rgb) / var(--opacity-subdued-text));
 }
 
@@ -2335,6 +2343,10 @@ product-price.text-block:is(.h1, .h2, .h3, .h4, .h5, .h6) > *:not(.tax-note) {
 
   .layout-panel-flex--row:not(.mobile-column) {
     flex-wrap: var(--flex-wrap-mobile);
+
+    > .menu {
+      flex: 1 1 min-content;
+    }
 
     > .text-block {
       flex: 1 1 var(--max-width--display-tight);
@@ -3805,6 +3817,7 @@ slideshow-arrows .slideshow-control {
   pointer-events: auto;
   opacity: 0;
   min-height: var(--minimum-touch-target);
+  min-width: var(--minimum-touch-target);
   padding: 0 var(--padding-xs);
   color: var(--color-white);
 }
