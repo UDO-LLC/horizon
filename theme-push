@@ -39,6 +39,12 @@ if [ "$NODE_MAJOR" -lt 12 ]; then
   echo "❌ Node.js version must be >=12 (detected v${NODE_MAJOR})."
   exit 1
 fi
+read -r -n 1 -t 10 -p "Make sure the latest customization/settings have been synchronized from the live theme! (y/N): " synchronized || true
+echo
+if [[ ! "$synchronized" =~ ^[Yy] ]]; then
+  echo "Synchronize the live theme's customization/settings first! Use ./theme-pull"
+  exit 1
+fi
 ENV_ARG="$1"
 EXTRA_ARGS="$2"
 CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD)
@@ -53,7 +59,7 @@ else
 fi
 if [ "$DEPLOY_BRANCH" = "main" ]; then
   echo "⚠️  You are on the main branch. Please checkout to 'prod' or 'dev',"
-  echo "    or run: ./deploy.sh prod (or dev)"
+  echo "    or run: $0 prod (or dev)"
   exit 1
 fi
 git fetch origin main >/dev/null 2>&1 || true
